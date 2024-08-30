@@ -1,0 +1,16 @@
+{
+  "files": {
+    "main.css": "/tejan-alnoor/static/css/main.f855e6bc.css",
+    "main.js": "/tejan-alnoor/static/js/main.be9e9f0f.js",
+    "static/js/453.7f50443d.chunk.js": "/tejan-alnoor/static/js/453.7f50443d.chunk.js",
+    "static/media/logo.svg": "/tejan-alnoor/static/media/logo.6ce24c58023cc2f8fd88fe9d219db6c6.svg",
+    "index.html": "/tejan-alnoor/index.html",
+    "main.f855e6bc.css.map": "/tejan-alnoor/static/css/main.f855e6bc.css.map",
+    "main.be9e9f0f.js.map": "/tejan-alnoor/static/js/main.be9e9f0f.js.map",
+    "453.7f50443d.chunk.js.map": "/tejan-alnoor/static/js/453.7f50443d.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.f855e6bc.css",
+    "static/js/main.be9e9f0f.js"
+  ]
+}
