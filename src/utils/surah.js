@@ -1,4 +1,4 @@
-export const surah = [
+export const suar = [
   { id: 1, surah: "الفاتحة", ayah: 7 },
   { id: 2, surah: "البقرة", ayah: 286 },
   { id: 3, surah: "آل عمران", ayah: 200 },
@@ -114,3 +114,16 @@ export const surah = [
   { id: 113, surah: "الفلق", ayah: 5 },
   { id: 114, surah: "الناس", ayah: 6 },
 ];
+
+export const commulativeSuar = suar.reduce((acc, item) => {
+  return [
+    ...acc,
+    {
+      ...item,
+      commulativeOffset:
+        acc.length > 0
+          ? acc[acc.length - 1].commulativeOffset + acc[acc.length - 1].ayah
+          : 0,
+    },
+  ];
+}, []);

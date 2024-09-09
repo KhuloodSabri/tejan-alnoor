@@ -4,7 +4,7 @@ import { Link as RouterLink } from "react-router-dom";
 import { Link as MuiLink } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import _ from "lodash";
-import { levels } from "../../constants/levels";
+import { levels } from "../../utils/levels";
 
 export default function SearchResultItem({ option, ...props }) {
   const navigate = useNavigate();
