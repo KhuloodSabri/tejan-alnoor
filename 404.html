@@ -9,15 +9,15 @@
       const currentSearch = window.location.search;
       const currentHash = window.location.hash;
 
-      let serach = currentSearch ?? "";
+      let search = currentSearch ?? "";
 
       if (currentSearch) {
-        serach += "&";
+        search += "&";
       } else {
-        serach += "?";
+        search += "?";
       }
 
-      serach += "redirect=" + currentPath;
+      search += "redirect=" + currentPath;
 
       // Construct the new URL for the redirect
       const newUrl = `./?${search}${currentHash}`;
