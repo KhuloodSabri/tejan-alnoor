@@ -2,7 +2,29 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta http-equiv="refresh" content="0; url=./index.html" />
+    <!-- <meta http-equiv="refresh" content="0; url=./" /> -->
+    <script>
+      // Get the current URL's query string
+      const currentPath = encodeURIComponent(window.location.pathname);
+      const currentSearch = window.location.search;
+      currentHash = window.location.hash;
+
+      let serach = currentSearch ?? "";
+
+      if (currentSearch) {
+        serach += "&";
+      } else {
+        serach += "?";
+      }
+
+      serach += "redirect=" + currentPath;
+
+      // Construct the new URL for the redirect
+      const newUrl = `./?${search}${currentHash}`;
+
+      // Redirect to the new URL
+      window.location.replace(newUrl);
+    </script>
   </head>
   <body></body>
 </html>
