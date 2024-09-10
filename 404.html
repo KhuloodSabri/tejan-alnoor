@@ -4,8 +4,9 @@
   <head>
     <!-- <meta http-equiv="refresh" content="0; url=./" /> -->
     <script>
-      // Get the current URL's query string
       const currentPath = encodeURIComponent(window.location.pathname);
+
+      //   if()
       const currentSearch = window.location.search;
       const currentHash = window.location.hash;
 
@@ -22,8 +23,9 @@
       // Construct the new URL for the redirect
       const newUrl = `./?${search}${currentHash}`;
 
+      console.log("newUrl", newUrl);
       // Redirect to the new URL
-      window.location.replace(newUrl);
+      //   window.location.replace(newUrl);
     </script>
   </head>
   <body></body>
