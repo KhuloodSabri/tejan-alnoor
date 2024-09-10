@@ -1,5 +1,6 @@
 import {
   Box,
+  ClickAwayListener,
   colors,
   lighten,
   Stack,
@@ -35,6 +36,8 @@ function ProgressLabel({ position, text }) {
           textOrientation: "mixed",
           rotate: "-180deg",
           py: 2,
+          fontWeight: 700,
+          letterSpacing: 0.6,
         }}
       >
         {text}
@@ -43,7 +46,9 @@ function ProgressLabel({ position, text }) {
   );
 }
 
-export default function revisitProgressBar({ student }) {
+export default function RevisitProgressBar({ student }) {
+  const [hintIndexOpen, setHintIndexOpen] = React.useState(null);
+
   const getAyahProgressDetails = (progress) => {
     const surah = commulativeSuar.findLast(
       (item) => item.commulativeOffset <= progress
@@ -52,14 +57,45 @@ export default function revisitProgressBar({ student }) {
     return { surah: surah.surah, ayah };
   };
 
+  const getPrgoressLabel = (progress) => {
+    if (student.progressUnit === "ayah") {
+      return `${progress.surah} (${translateNumberToArabic(progress.ayah)})`;
+    }
+
+    return `صفــ ${translateNumberToArabic(progress.page)} ــحة`;
+  };
+
+  const getHint = (progressRange) => {
+    let prefix = "أتم الطالب";
+    if (student.gender === "female") {
+      prefix = "أتمت الطالبة";
+    }
+
+    if (student.progressUnit === "ayah") {
+      return `${prefix} مراجعة الآيات من سورة ${
+        progressRange[0].surah
+      } آية (${translateNumberToArabic(progressRange[0].ayah)}) إلى سورة ${
+        progressRange[1].surah
+      } آية (${translateNumberToArabic(progressRange[1].ayah)})`;
+    }
+
+    return `${prefix} مراجعة الصفحات من صفحة ${translateNumberToArabic(
+      progressRange[0].page
+    )} إلى صفحة ${translateNumberToArabic(progressRange[1].page)}`;
+  };
+
   const rangesWithDetails = (student.revisitProgress ?? []).map((range) => [
     {
       offset: range[0] - student.start,
-      ...getAyahProgressDetails(range[0]),
+      ...(student.progressUnit === "ayah"
+        ? getAyahProgressDetails(range[0])
+        : { page: range[0] }),
     },
     {
       offset: range[1] - student.start,
-      ...getAyahProgressDetails(range[1]),
+      ...(student.progressUnit === "ayah"
+        ? getAyahProgressDetails(range[1])
+        : { page: range[1] }),
     },
   ]);
 
@@ -77,31 +113,65 @@ export default function revisitProgressBar({ student }) {
         }}
         position="relative"
       >
-        {rangesWithDetails.map((range) => (
-          <Tooltip
+        {rangesWithDetails.map((range, index) => (
+          <ClickAwayListener
             key={range[0].offset}
-            // title={`أتمت الطالبة المراجعة من ${
-            //   surah.find(({ id }) => id === ranges[index]?.from?.id)?.surah
-            // }`}
+            onClickAway={() => {
+              if (hintIndexOpen === index) {
+                setHintIndexOpen(null);
+              }
+            }}
           >
             <Box
-              key={range[0].offset}
-              bgcolor={lighten(colors.teal["A700"], 0.85)}
-              position={"absolute"}
-              left={(range[0].offset / total) * 100 + "%"}
-              width={
-                ((range[1].offset - range[0].offset + 1) / total) * 100 + "%"
-              } // inclusive
-              minHeight={50}
-              borderRadius={
-                range[0].offset === 0
-                  ? "10px 0 0 10px"
-                  : range[1].offset === total
-                  ? "0 10px 0 10px"
-                  : 0
-              }
-            ></Box>
-          </Tooltip>
+              onMouseLeave={() => {
+                setHintIndexOpen(null);
+              }}
+            >
+              <Tooltip
+                title={getHint(range)}
+                open={hintIndexOpen === index}
+                disableFocusListener
+                disableHoverListener
+                disableTouchListener
+                slotProps={{
+                  tooltip: {
+                    sx: {
+                      backgroundColor: colors.teal["500"],
+                      fontSize: 15,
+                      fontWeight: 500,
+                      lineHeight: 1.5,
+                      letterSpacing: 0.5,
+                    },
+                  },
+                }}
+              >
+                <Box
+                  key={range[0].offset}
+                  bgcolor={lighten(colors.teal["A700"], 0.85)}
+                  position={"absolute"}
+                  left={(range[0].offset / total) * 100 + "%"}
+                  width={
+                    ((range[1].offset - range[0].offset + 1) / total) * 100 +
+                    "%"
+                  } // inclusive
+                  minHeight={50}
+                  borderRadius={
+                    range[0].offset === 0
+                      ? "10px 0 0 10px"
+                      : range[1].offset === total
+                      ? "0 10px 0 10px"
+                      : 0
+                  }
+                  onClick={() => {
+                    setHintIndexOpen(index);
+                  }}
+                  onMouseEnter={() => {
+                    setHintIndexOpen(index);
+                  }}
+                ></Box>
+              </Tooltip>
+            </Box>
+          </ClickAwayListener>
         ))}
       </Box>
       <Stack minWidth="100%" position="relative">
@@ -109,15 +179,11 @@ export default function revisitProgressBar({ student }) {
           <Box key={range[0].offset}>
             <ProgressLabel
               position={`calc(${(range[0].offset / total) * 100}% + 2px);`} // 2px for border
-              text={`${range[0].surah} (${translateNumberToArabic(
-                range[0].ayah
-              )})`}
+              text={getPrgoressLabel(range[0])}
             />
             <ProgressLabel
               position={`${((range[1].offset + 1) / total) * 100}%`}
-              text={`${range[1].surah} (${translateNumberToArabic(
-                range[1].ayah
-              )})`}
+              text={getPrgoressLabel(range[1])}
             />
           </Box>
         ))}

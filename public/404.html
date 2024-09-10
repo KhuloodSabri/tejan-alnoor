@@ -1,0 +1,29 @@
+<!-- public/404.html -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- <meta http-equiv="refresh" content="0; url=./" /> -->
+    <script>
+      const currentPath = encodeURIComponent(window.location.pathname);
+      const currentSearch = window.location.search;
+      const currentHash = window.location.hash;
+
+      let newSearchParams = currentSearch ?? "";
+
+      if (currentSearch) {
+        newSearchParams += "&";
+      } else {
+        newSearchParams += "?";
+      }
+
+      newSearchParams += "redirect=" + currentPath;
+
+      // Construct the new URL for the redirect
+      const newUrl = `${window.location.origin}/tejan-alnoor${newSearchParams}${currentHash}`;
+
+      // Redirect to the new URL
+      window.location.replace(newUrl);
+    </script>
+  </head>
+  <body></body>
+</html>
