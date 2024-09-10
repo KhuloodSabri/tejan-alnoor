@@ -5,27 +5,25 @@
     <!-- <meta http-equiv="refresh" content="0; url=./" /> -->
     <script>
       const currentPath = encodeURIComponent(window.location.pathname);
-
-      //   if()
       const currentSearch = window.location.search;
       const currentHash = window.location.hash;
 
-      let search = currentSearch ?? "";
+      let newSearchParams = currentSearch ?? "";
 
       if (currentSearch) {
-        search += "&";
+        newSearchParams += "&";
       } else {
-        search += "?";
+        newSearchParams += "?";
       }
 
-      search += "redirect=" + currentPath;
+      newSearchParams += "redirect=" + currentPath;
 
       // Construct the new URL for the redirect
-      const newUrl = `./?${search}${currentHash}`;
+      const newUrl = `${window.location.origin}${newSearchParams}${currentHash}`;
 
-      console.log("newUrl", newUrl);
+      //   console.log("newUrl", newUrl);
       // Redirect to the new URL
-      //   window.location.replace(newUrl);
+      window.location.replace(newUrl);
     </script>
   </head>
   <body></body>
