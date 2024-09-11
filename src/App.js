@@ -1,6 +1,6 @@
 import logo from "./logo.svg";
 import "./App.css";
-import { useStudents } from "./hooks/useData";
+import { useStudents } from "./services/students";
 import FuzzySearch from "fuzzy-search";
 import { useEffect, useMemo } from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";

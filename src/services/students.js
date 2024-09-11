@@ -17,7 +17,7 @@ export const useStudents = () => {
   useEffect(() => {
     setLoading(true);
     const fetchData = async () => {
-      const url = `${BASE_URL}?token=${encodeURIComponent(getToken())}`;
+      const url = `${BASE_URL}`;
 
       try {
         const response = await axios.get(url);
@@ -46,9 +46,7 @@ export const useStudent = (studentId) => {
   useEffect(() => {
     setLoading(true);
     const fetchData = async () => {
-      const url = `${BASE_URL}/${studentId}?token=${encodeURIComponent(
-        getToken()
-      )}`;
+      const url = `${BASE_URL}/${studentId}`;
 
       try {
         const response = await axios.get(url);
@@ -68,4 +66,17 @@ export const useStudent = (studentId) => {
     data,
     loading,
   };
+};
+
+export const updateStudentProgress = async (studentId, updates) => {
+  const url = `${BASE_URL}/${studentId}`;
+  const response = await axios.put(url, {
+    ...updates,
+    studentID: studentId,
+  });
+
+  console.log("PUT response", response);
+  if (response.status !== 200) {
+    throw new Error("Failed to update student progress");
+  }
 };

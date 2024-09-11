@@ -11,9 +11,10 @@ import {
 } from "@mui/material";
 import React from "react";
 import _ from "lodash";
-import { useStudents } from "../../hooks/useData";
+import { useStudents } from "../../services/students";
 import FuzzySearch from "fuzzy-search";
 import SearchResultItem from "./searchResultItem";
+import { normalizeString } from "../../utils/string";
 
 export default function SearchPage() {
   const { data: students, loading } = useStudents(); // This will fetch the data from the Google Sheet
@@ -23,20 +24,6 @@ export default function SearchPage() {
   );
 
   console.log("recentSearches", recentSearches);
-
-  const normalizeString = (name) => {
-    let result = name;
-    result = result.replace("أ", "ا");
-    result = result.replace("ى", "ا");
-    result = result.replace("آ", "ا");
-    result = result.replace("إ", "ا");
-    result = result.replace("ي ", "ا ");
-    result = result.replace("ؤ", "و");
-    result = result.replace("ة", "ه");
-    result = result.replace("ئ", "ي");
-
-    return result;
-  };
 
   const filterOptions = (options, { inputValue }) => {
     const normalizedOptions =
