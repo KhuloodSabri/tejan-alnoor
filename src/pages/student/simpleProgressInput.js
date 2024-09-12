@@ -64,13 +64,19 @@ export default function SimpleProgressInput({
   };
 
   return (
-    <Stack direction="row" columnGap={1} alignItems="center">
-      <Typography variant="h6" color={colors.teal["600"]}>
+    <Stack
+      direction="row"
+      columnGap={1}
+      alignItems="center"
+      flexWrap="wrap"
+      width={{ xs: undefined, sm: "fit-content" }}
+    >
+      <Typography variant="h6" color={colors.teal["700"]}>
         <Typography
           component="span"
           fontWeight={600}
           variant="h6"
-          color={colors.teal["600"]}
+          color={colors.teal["700"]}
         >
           <KeyboardDoubleArrowLeftIcon sx={{ verticalAlign: "text-bottom" }} />
         </Typography>
@@ -82,7 +88,7 @@ export default function SimpleProgressInput({
           : ""}
       </Typography>
       {!editing && (
-        <Box>
+        <Box ml="auto">
           <Button
             size="small"
             // variant="outlined"
@@ -100,31 +106,26 @@ export default function SimpleProgressInput({
         </Box>
       )}
       {editing && (
-        <TextField
-          dir="rtl"
-          value={value}
-          size="small"
-          variant="outlined"
-          sx={{
-            width: 80,
-            fieldset: { borderColor: validationError ? "red" : undefined },
-          }}
-          onChange={handleChange}
-        />
-      )}
+        <Box ml={"auto"}>
+          <TextField
+            dir="rtl"
+            value={value}
+            size="small"
+            variant="outlined"
+            sx={{
+              width: 80,
+              fieldset: { borderColor: validationError ? "red" : undefined },
+            }}
+            onChange={handleChange}
+          />
 
-      {editing && (
-        <Box>
           <LoadingButton
             size="small"
             // variant="outlined"
             onClick={handleSave}
             endIcon={<SaveIcon />}
             loading={saveStatus.loading}
-            disabled={
-              saveStatus.loading ||
-              translateNumberToEnglish(value) === student[progressKey]
-            }
+            disabled={saveStatus.loading}
             sx={{
               //   boxShadow: "none",
               fontWeight: 600,

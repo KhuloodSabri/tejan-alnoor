@@ -76,7 +76,10 @@ export const updateStudentProgress = async (studentId, updates) => {
   });
 
   console.log("PUT response", response);
+
   if (response.status !== 200) {
     throw new Error("Failed to update student progress");
   }
+
+  return response.data;
 };

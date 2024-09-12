@@ -130,8 +130,8 @@ export const commulativeSuar = suar.reduce((acc, item) => {
 
 export const getCommulativeAyahDetails = (commulativeValue) => {
   const surah = commulativeSuar.findLast(
-    (item) => item.commulativeOffset <= commulativeValue
+    (item) => item.commulativeOffset <= commulativeValue - 1 // surah starts from 1
   );
-  const ayah = commulativeValue - surah.commulativeOffset + 1; // starts from 1
+  const ayah = commulativeValue - surah.commulativeOffset;
   return { surah: surah.surah, ayah };
 };

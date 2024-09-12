@@ -20,11 +20,19 @@ import FuzzySearch from "fuzzy-search";
 import { normalizeString } from "../../utils/string";
 import { translateNumberToEnglish } from "../../utils/numbers";
 
-export default function AyahInput({ label, value, setValue, setErrorMessage }) {
+export default function AyahInput({
+  label,
+  setValue,
+  setErrorMessage,
+  minValue,
+  maxValue,
+  onChange,
+}) {
   const [surah, setSurah] = useState();
   const [ayah, setAyah] = useState("");
 
   useEffect(() => {
+    onChange?.(surah, ayah);
     let error = null;
 
     if (!surah) {
@@ -34,11 +42,16 @@ export default function AyahInput({ label, value, setValue, setErrorMessage }) {
     } else {
       const ayahNum = Number(translateNumberToEnglish(ayah));
       if (isNaN(ayahNum)) {
-        error = "الرجاء إدخال رقم آية صحيح";
+        error = `رقم الآية (${ayah}) غير صحيح`;
       } else if (parseInt(ayahNum) !== ayahNum) {
-        error = "الرجاء إدخال رقم آية صحيح";
+        error = `رقم الآية (${ayah}) غير صحيح`;
       } else if (ayahNum < 1 || ayahNum > surah.ayah) {
-        error = "رقم الآية المدخل غير موجود في السورة المختارة";
+        error = `رقم الآية ${ayahNum} غير موجود في سورة ${surah.surah}`;
+      } else if (
+        (minValue && surah.commulativeOffset + Number(ayah) < minValue) ||
+        (maxValue && surah.commulativeOffset + Number(ayah) > maxValue)
+      ) {
+        error = "يجب أن تكون بداية المراجعة المدخلة أصغر من نهايتها";
       }
     }
 
@@ -48,8 +61,10 @@ export default function AyahInput({ label, value, setValue, setErrorMessage }) {
       return;
     }
 
-    setValue(surah.commulativeOffset + ayah);
-  }, [surah, ayah, setValue, setErrorMessage]);
+    console.log("new value", surah.commulativeOffset + Number(ayah));
+    setValue(surah.commulativeOffset + Number(ayah));
+    setErrorMessage(null);
+  }, [surah, ayah, setValue, setErrorMessage, minValue, maxValue, onChange]);
 
   const filterOptions = (options, { inputValue }) => {
     const normalizedOptions =

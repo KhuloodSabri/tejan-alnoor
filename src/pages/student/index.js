@@ -1,4 +1,13 @@
-import { colors, Divider, Stack, Typography } from "@mui/material";
+import {
+  backdropClasses,
+  Button,
+  colors,
+  Divider,
+  Stack,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
 import React from "react";
 import { useParams } from "react-router-dom";
 
@@ -6,29 +15,54 @@ import { useStudent } from "../../services/students";
 import RevisitProgressInput from "./revisitProgressInput";
 import SimpleProgressInput from "./simpleProgressInput";
 import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrowLeft";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 
 export default function StudenPage() {
   const { studentId: studentIdStr } = useParams();
   const studentId = parseInt(studentIdStr);
 
   const { data: student, loading } = useStudent(studentId);
+  const theme = useTheme();
+  const mdScreen = useMediaQuery(theme.breakpoints.up("md"));
 
   if (!student) {
     return;
   }
 
   return (
-    <Stack width="100%" rowGap={2}>
-      <Typography variant="h4" align="center" color={colors.teal["600"]}>
+    <Stack
+      width="100%"
+      maxWidth={"calc(100vw - 50px)"}
+      rowGap={2}
+      boxSizing="border-box"
+      position="relative"
+    >
+      <Button
+        size={mdScreen ? "large" : "small"}
+        sx={{
+          position: "absolute",
+          top: -40,
+          left: { xs: -16, md: -40 },
+          boxShadow: "none",
+          backgroundColor: colors.teal["50"],
+          borderRadius: "0 0 10px 0",
+          pr: { xs: 1, md: 2 },
+          fontWeight: { xs: 500, md: 700 },
+        }}
+        startIcon={<ArrowForwardIcon />}
+      >
+        العودة للبحث
+      </Button>
+      <Typography variant="h4" align="center" color={colors.teal["700"]}>
         {student.gender === "male" ? "الطالب" : "الطالبة"} {student.studentName}
       </Typography>
       <Divider />
-      <Typography variant="h6" color={colors.teal["600"]}>
+      <Typography variant="h6" color={colors.teal["700"]}>
         <Typography
           component="span"
           fontWeight={600}
           variant="h6"
-          color={colors.teal["600"]}
+          color={colors.teal["700"]}
         >
           <KeyboardDoubleArrowLeftIcon sx={{ verticalAlign: "text-bottom" }} />
           المستوى
@@ -37,12 +71,12 @@ export default function StudenPage() {
         {student.levelName}
       </Typography>
 
-      <Typography variant="h6" color={colors.teal["600"]}>
+      <Typography variant="h6" color={colors.teal["700"]}>
         <Typography
           component="span"
           fontWeight={600}
           variant="h6"
-          color={colors.teal["600"]}
+          color={colors.teal["700"]}
         >
           <KeyboardDoubleArrowLeftIcon sx={{ verticalAlign: "text-bottom" }} />
           المشرفـ / ـة

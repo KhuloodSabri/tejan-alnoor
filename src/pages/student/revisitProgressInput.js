@@ -56,6 +56,9 @@ export default function RevisitProgressInput({ student }) {
   const [hintIndexOpen, setHintIndexOpen] = React.useState(null);
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [dialogMode, setDialogMode] = React.useState("add");
+  const [revisitProgress, setRevisitProgress] = React.useState(
+    student.revisitProgress
+  );
 
   const getPrgoressLabel = (progress) => {
     if (student.progressUnit === "ayah") {
@@ -81,7 +84,7 @@ export default function RevisitProgressInput({ student }) {
     )} إلى صفحة ${translateNumberToArabic(progressRange[1].page)}`;
   };
 
-  const rangesWithDetails = (student.revisitProgress ?? []).map((range) => [
+  const rangesWithDetails = (revisitProgress ?? []).map((range) => [
     {
       offset: range[0] - student.start,
       ...(student.progressUnit === "ayah"
@@ -101,12 +104,12 @@ export default function RevisitProgressInput({ student }) {
   return (
     <Stack rowGap={1}>
       <Box>
-        <Typography variant="h6" color={colors.teal["600"]}>
+        <Typography variant="h6" color={colors.teal["700"]}>
           <Typography
             component="span"
             fontWeight={600}
             variant="h6"
-            color={colors.teal["600"]}
+            color={colors.teal["700"]}
           >
             <KeyboardDoubleArrowLeftIcon
               sx={{ verticalAlign: "text-bottom" }}
@@ -238,10 +241,14 @@ export default function RevisitProgressInput({ student }) {
         )}
       </Box>
       <RevisitProgressDialog
-        student={student}
+        student={{ ...student, revisitProgress }}
         open={dialogOpen}
-        handleClose={() => setDialogOpen(false)}
+        onClose={() => setDialogOpen(false)}
         mode={dialogMode}
+        onSubmit={(updatedValue) => {
+          setRevisitProgress(updatedValue);
+          setDialogOpen(false);
+        }}
       />
     </Stack>
   );
