@@ -23,7 +23,7 @@ export default function StudenPage() {
 
   const { data: student, loading } = useStudent(studentId);
   const theme = useTheme();
-  const mdScreen = useMediaQuery(theme.breakpoints.up("md"));
+  const smScreen = useMediaQuery(theme.breakpoints.up("sm"));
 
   if (!student) {
     return;
@@ -38,7 +38,7 @@ export default function StudenPage() {
       position="relative"
     >
       <Button
-        size={mdScreen ? "large" : "small"}
+        size={smScreen ? "large" : "small"}
         sx={{
           position: "absolute",
           top: -40,

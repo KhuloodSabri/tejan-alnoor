@@ -16,6 +16,7 @@ import { updateStudentProgress } from "../../services/students";
 import LoadingButton from "@mui/lab/LoadingButton";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
+import PageInput from "./pageInput";
 
 export default function RevisitProgressDialog({
   student,
@@ -163,7 +164,13 @@ export default function RevisitProgressDialog({
               onChange={onChange}
             />
           ) : (
-            <> </>
+            <PageInput
+              label="من"
+              maxValue={toValue}
+              setValue={setFromValue}
+              setErrorMessage={setFromErrorMessage}
+              onChange={onChange}
+            />
           )}
           {student.progressUnit === "ayah" ? (
             <AyahInput
@@ -174,7 +181,13 @@ export default function RevisitProgressDialog({
               onChange={onChange}
             />
           ) : (
-            <> </>
+            <PageInput
+              label="إلى"
+              minValue={fromValue}
+              setValue={setToValue}
+              setErrorMessage={setToErrorMessage}
+              onChange={onChange}
+            />
           )}
         </Stack>
         {showError && (

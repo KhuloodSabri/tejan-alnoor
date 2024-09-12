@@ -1,20 +1,8 @@
 import React, { useEffect, useState } from "react";
-import Button from "@mui/material/Button";
+
 import TextField from "@mui/material/TextField";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogTitle from "@mui/material/DialogTitle";
-import { getNegativeProgressPrefix, getPositiveProgressPrefix } from "./utils";
-import {
-  Autocomplete,
-  Box,
-  MenuItem,
-  Select,
-  Stack,
-  Typography,
-} from "@mui/material";
+
+import { Autocomplete, Stack, Typography } from "@mui/material";
 import { commulativeSuar } from "../../utils/surah";
 import FuzzySearch from "fuzzy-search";
 import { normalizeString } from "../../utils/string";
@@ -32,7 +20,7 @@ export default function AyahInput({
   const [ayah, setAyah] = useState("");
 
   useEffect(() => {
-    onChange?.(surah, ayah);
+    onChange?.();
     let error = null;
 
     if (!surah) {
@@ -41,7 +29,7 @@ export default function AyahInput({
       error = "الرجاء إدخال رقم آية";
     } else {
       const ayahNum = Number(translateNumberToEnglish(ayah));
-      if (isNaN(ayahNum)) {
+      if (isNaN(ayahNum) || ayahNum < 1) {
         error = `رقم الآية (${ayah}) غير صحيح`;
       } else if (parseInt(ayahNum) !== ayahNum) {
         error = `رقم الآية (${ayah}) غير صحيح`;

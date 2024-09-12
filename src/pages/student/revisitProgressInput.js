@@ -237,7 +237,11 @@ export default function RevisitProgressInput({ student }) {
             rangesWithDetails[0][0] !== student.start) && (
             <ProgressLabel
               position={`2px`}
-              text={getPrgoressLabel(getCommulativeAyahDetails(student.start))}
+              text={getPrgoressLabel(
+                student.progressUnit === "ayah"
+                  ? getCommulativeAyahDetails(student.start)
+                  : { page: student.start }
+              )}
               color={colors.blueGrey["100"]}
             />
           )}
@@ -260,7 +264,11 @@ export default function RevisitProgressInput({ student }) {
               student.end) && (
             <ProgressLabel
               position={`calc(100% - 2px)`}
-              text={getPrgoressLabel(getCommulativeAyahDetails(student.end))}
+              text={getPrgoressLabel(
+                student.progressUnit === "ayah"
+                  ? getCommulativeAyahDetails(student.end)
+                  : { page: student.end }
+              )}
               color={colors.blueGrey["100"]}
             />
           )}
