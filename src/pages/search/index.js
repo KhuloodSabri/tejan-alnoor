@@ -1,6 +1,7 @@
 import {
   Autocomplete,
   Box,
+  CircularProgress,
   colors,
   Divider,
   lighten,
@@ -57,6 +58,7 @@ export default function SearchPage() {
         options={students}
         sx={{ width: "100%" }}
         loading={loading}
+        loadingText="جاري التحميل..."
         renderInput={(params) => (
           <TextField
             {...params}
@@ -92,7 +94,13 @@ export default function SearchPage() {
             قمت بالبحث مؤخراً
             <Divider />
           </Typography>
-
+          {loading && (
+            <Stack justifyContent="center" mt={5} alignItems="center">
+              <Box width="fit-content">
+                <CircularProgress />
+              </Box>
+            </Stack>
+          )}
           <List>
             {recentSearches.map((id) => (
               <Box key={id}>

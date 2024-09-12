@@ -1,5 +1,7 @@
 import {
+  Box,
   Button,
+  CircularProgress,
   colors,
   Divider,
   Stack,
@@ -24,6 +26,16 @@ export default function StudenPage() {
   const { data: student, loading } = useStudent(studentId);
   const theme = useTheme();
   const smScreen = useMediaQuery(theme.breakpoints.up("sm"));
+
+  if (loading) {
+    return (
+      <Stack justifyContent="center" mt={5} alignItems="center">
+        <Box width="fit-content">
+          <CircularProgress />
+        </Box>
+      </Stack>
+    );
+  }
 
   if (!student) {
     return;
