@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Dialog from "@mui/material/Dialog";
@@ -30,6 +30,8 @@ export default function RevisitProgressDialog({
   const [toErrorMessage, setToErrorMessage] = useState();
   const [loading, setLoading] = useState(false);
   const [showError, setShowError] = useState(false);
+
+  const onChange = useCallback(() => setShowError(false), []);
 
   const handleSubmit = async () => {
     if (fromErrorMessage || toErrorMessage) {
@@ -158,7 +160,7 @@ export default function RevisitProgressDialog({
               maxValue={toValue}
               setValue={setFromValue}
               setErrorMessage={setFromErrorMessage}
-              onChange={() => setShowError(false)}
+              onChange={onChange}
             />
           ) : (
             <> </>
@@ -169,7 +171,7 @@ export default function RevisitProgressDialog({
               minValue={fromValue}
               setValue={setToValue}
               setErrorMessage={setToErrorMessage}
-              onChange={() => setShowError(false)}
+              onChange={onChange}
             />
           ) : (
             <> </>

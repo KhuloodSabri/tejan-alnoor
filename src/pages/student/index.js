@@ -1,5 +1,4 @@
 import {
-  backdropClasses,
   Button,
   colors,
   Divider,
@@ -16,6 +15,7 @@ import RevisitProgressInput from "./revisitProgressInput";
 import SimpleProgressInput from "./simpleProgressInput";
 import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrowLeft";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import { Link as RouterLink } from "react-router-dom";
 
 export default function StudenPage() {
   const { studentId: studentIdStr } = useParams();
@@ -49,6 +49,8 @@ export default function StudenPage() {
           pr: { xs: 1, md: 2 },
           fontWeight: { xs: 500, md: 700 },
         }}
+        component={RouterLink}
+        to={`/tejan-alnoor`}
         startIcon={<ArrowForwardIcon />}
       >
         العودة للبحث

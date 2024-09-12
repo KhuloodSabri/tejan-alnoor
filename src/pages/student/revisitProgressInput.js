@@ -18,13 +18,13 @@ import _ from "lodash";
 import { getNegativeProgressPrefix, getPositiveProgressPrefix } from "./utils";
 import RevisitProgressDialog from "./revisitProgressDialog";
 
-function ProgressLabel({ position, text }) {
+function ProgressLabel({ position, text, color }) {
   return (
     <Box
       boxSizing="border-box"
       sx={{
         position: "absolute",
-        borderLeft: `2px solid ${colors.teal["A700"]}`,
+        borderLeft: `2px solid ${color ?? colors.teal["A700"]}`,
         left: position,
         backgroundColor: colors.common.white,
       }}
@@ -35,7 +35,7 @@ function ProgressLabel({ position, text }) {
         whiteSpace="nowrap"
         fontSize={{ xs: 13, sm: 14 }}
         component="div"
-        color={colors.teal["400"]}
+        color={color ?? colors.teal["400"]}
         sx={{
           mt: "auto",
           writingMode: "vertical-rl",
@@ -44,6 +44,8 @@ function ProgressLabel({ position, text }) {
           py: 2,
           fontWeight: 700,
           letterSpacing: 0.6,
+          minHeight: 90,
+          textAlign: "center",
         }}
       >
         {text}
@@ -116,6 +118,13 @@ export default function RevisitProgressInput({ student }) {
             />
           </Typography>
           {progressPrefix} المراجعة كما هو موضح في الشكل أدناه
+        </Typography>
+        <Typography
+          variant="subtitle2"
+          color={colors.teal["700"]}
+          sx={{ my: 0.8 }}
+        >
+          *اضغط على المساحات الخضراء للمزيد من التفاصيل
         </Typography>
       </Box>
       <Stack direction="row" columnGap={2} pl={3}>
@@ -223,9 +232,17 @@ export default function RevisitProgressInput({ student }) {
             </ClickAwayListener>
           ))}
         </Box>
-        {rangesWithDetails.length > 0 && (
-          <Stack minWidth="100%" position="relative" height={160}>
-            {rangesWithDetails.map((range) => (
+        <Stack minWidth="100%" position="relative" height={160}>
+          {(!rangesWithDetails?.length ||
+            rangesWithDetails[0][0] !== student.start) && (
+            <ProgressLabel
+              position={`2px`}
+              text={getPrgoressLabel(getCommulativeAyahDetails(student.start))}
+              color={colors.blueGrey["100"]}
+            />
+          )}
+          {rangesWithDetails?.length > 0 &&
+            rangesWithDetails.map((range) => (
               <Box key={range[0].offset}>
                 <ProgressLabel
                   position={`calc(${(range[0].offset / total) * 100}% + 2px);`} // 2px for border
@@ -237,8 +254,17 @@ export default function RevisitProgressInput({ student }) {
                 />
               </Box>
             ))}
-          </Stack>
-        )}
+
+          {(!rangesWithDetails?.length ||
+            rangesWithDetails[rangesWithDetails.length - 1][1] !==
+              student.end) && (
+            <ProgressLabel
+              position={`calc(100% - 2px)`}
+              text={getPrgoressLabel(getCommulativeAyahDetails(student.end))}
+              color={colors.blueGrey["100"]}
+            />
+          )}
+        </Stack>
       </Box>
       <RevisitProgressDialog
         student={{ ...student, revisitProgress }}
