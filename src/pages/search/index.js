@@ -24,8 +24,6 @@ export default function SearchPage() {
     localStorage.getItem("recent-seraches") ?? "[]"
   );
 
-  console.log("recentSearches", recentSearches);
-
   const filterOptions = (options, { inputValue }) => {
     const normalizedOptions =
       options.map((option) => ({

@@ -21,7 +21,7 @@ export const useStudents = () => {
 
       try {
         const response = await axios.get(url);
-        console.log("response", response);
+
         setData(response.data);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -50,7 +50,7 @@ export const useStudent = (studentId) => {
 
       try {
         const response = await axios.get(url);
-        console.log("response", response);
+
         setData(response.data);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -74,8 +74,6 @@ export const updateStudentProgress = async (studentId, updates) => {
     ...updates,
     studentID: studentId,
   });
-
-  console.log("PUT response", response);
 
   if (response.status !== 200) {
     throw new Error("Failed to update student progress");

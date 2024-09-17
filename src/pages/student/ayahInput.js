@@ -49,7 +49,6 @@ export default function AyahInput({
       return;
     }
 
-    console.log("new value", surah.commulativeOffset + Number(ayah));
     setValue(surah.commulativeOffset + Number(ayah));
     setErrorMessage(null);
   }, [surah, ayah, setValue, setErrorMessage, minValue, maxValue, onChange]);

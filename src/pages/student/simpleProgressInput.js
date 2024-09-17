@@ -48,7 +48,7 @@ export default function SimpleProgressInput({
       setValidationError(true);
       return;
     }
-    console.log("submit number", number);
+
     setSaveStatus({ loading: true, error: null });
 
     try {

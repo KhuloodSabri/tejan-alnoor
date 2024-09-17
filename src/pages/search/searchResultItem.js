@@ -15,7 +15,6 @@ export default function SearchResultItem({ option, ...props }) {
       localStorage.getItem("recent-seraches") ?? "[]"
     );
 
-    console.log("adding", option.studentID);
     const newList = [
       option.studentID,
       ...existingList.filter(
@@ -25,7 +24,6 @@ export default function SearchResultItem({ option, ...props }) {
       .filter((x) => !_.isEmpty(`${x}`))
       .slice(0, 7);
 
-    console.log("newList", newList);
     localStorage.setItem("recent-seraches", JSON.stringify(newList));
   }, [option?.studentID]);
 

@@ -36,7 +36,6 @@ export default function RevisitProgressDialog({
 
   const handleSubmit = async () => {
     if (fromErrorMessage || toErrorMessage) {
-      console.log("error", fromErrorMessage, toErrorMessage);
       setShowError(true);
       return;
     }
@@ -55,7 +54,7 @@ export default function RevisitProgressDialog({
         return;
       }
 
-      //   deleted range is completely outside the current ranges
+      // deleted range is completely outside the current ranges
       if (
         toValue < oldProgress[0][0] ||
         fromValue > oldProgress[oldProgress.length - 1][1]
@@ -106,15 +105,6 @@ export default function RevisitProgressDialog({
       if (part2FirstIndex >= 0) {
         newProgress = [...newProgress, ...oldProgress.slice(part2FirstIndex)];
       }
-
-      console.log("oldProgress", student.revisitProgress);
-      console.log("fromValue", fromValue);
-      console.log("toValue", toValue);
-      console.log("partialRange1Index", partialRange1Index);
-      console.log("partialRange2Index", partialRange2Index);
-      console.log("part1LastIndex", part1LastIndex);
-      console.log("part2FirstIndex", part2FirstIndex);
-      console.log("newProgress", newProgress);
 
       response = await updateStudentProgress(student.studentID, {
         revisitProgress: newProgress,
