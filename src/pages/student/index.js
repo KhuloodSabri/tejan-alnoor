@@ -59,7 +59,7 @@ export default function StudenPage() {
           backgroundColor: colors.teal["50"],
           borderRadius: "0 0 10px 0",
           pr: { xs: 1, md: 2 },
-          fontWeight: { xs: 500, md: 700 },
+          fontWeight: 700,
         }}
         component={RouterLink}
         to={`/tejan-alnoor`}

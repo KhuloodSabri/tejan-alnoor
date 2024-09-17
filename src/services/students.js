@@ -4,6 +4,9 @@ import axios from "axios";
 const BASE_URL =
   "https://5nvqhwbweydlc2yfyoqca5dyie0sonpg.lambda-url.eu-north-1.on.aws/students";
 
+const ADMIN_BASE_URL =
+  "https://dtoo4lhm5ojwgql5xfxpmo6nru0alhkp.lambda-url.eu-north-1.on.aws/students";
+
 const getToken = () => {
   const url = new URL(window.location.href);
   const params = new URLSearchParams(url.search);
@@ -77,6 +80,17 @@ export const updateStudentProgress = async (studentId, updates) => {
 
   if (response.status !== 200) {
     throw new Error("Failed to update student progress");
+  }
+
+  return response.data;
+};
+
+export const exportStudentProgress = async () => {
+  const url = `${ADMIN_BASE_URL}/exportProgress`;
+  const response = await axios.get(url);
+
+  if (response.status !== 200) {
+    throw new Error("Failed to export student progress");
   }
 
   return response.data;

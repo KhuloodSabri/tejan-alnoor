@@ -13,6 +13,7 @@ import rtlPlugin from "stylis-plugin-rtl";
 import createCache from "@emotion/cache";
 import StudenPage from "./pages/student";
 import { useNavigate } from "react-router-dom";
+import ExportProgressPage from "./pages/admin/students/exportProgress";
 
 // Create rtl cache
 const cacheRtl = createCache({
@@ -73,6 +74,10 @@ function App() {
                 <Route
                   path="/tejan-alnoor/students/:studentId"
                   element={<StudenPage />}
+                />
+                <Route
+                  path="/tejan-alnoor/admin/students/exportProgress"
+                  element={<ExportProgressPage />}
                 />
                 {/* <Route path="/contact" element={<Contact />} /> */}
               </Routes>
