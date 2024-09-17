@@ -2,7 +2,10 @@ import React, { useEffect, useState } from "react";
 
 import TextField from "@mui/material/TextField";
 
-import { translateNumberToEnglish } from "../../utils/numbers";
+import {
+  translateNumberToEnglish,
+  translateNumberToArabic,
+} from "../../utils/numbers";
 import { Stack, Typography } from "@mui/material";
 
 export default function PageInput({
@@ -11,6 +14,8 @@ export default function PageInput({
   setErrorMessage,
   minValue,
   maxValue,
+  absoluteMinValue,
+  absoluteMaxValue,
   onChange,
 }) {
   const [page, setPage] = useState("");
@@ -27,8 +32,15 @@ export default function PageInput({
         error = `رقم الصفحة (${page}) غير صحيح`;
       } else if (parseInt(pageNum) !== pageNum) {
         error = `رقم الآية (${page}) غير صحيح`;
-      } else if (pageNum < minValue || pageNum > maxValue) {
+      } else if (
+        (minValue && pageNum < minValue) ||
+        (maxValue && pageNum > maxValue)
+      ) {
         error = "يجب أن تكون بداية المراجعة المدخلة أصغر من نهايتها";
+      } else if (pageNum < absoluteMinValue || pageNum > absoluteMaxValue) {
+        error = `الصفحة ${translateNumberToArabic(
+          page
+        )} ليست ضمن خطة الفصل الحالي`;
       }
     }
 
@@ -40,7 +52,16 @@ export default function PageInput({
 
     setValue(Number(page));
     setErrorMessage(null);
-  }, [setValue, setErrorMessage, minValue, maxValue, onChange, page]);
+  }, [
+    setValue,
+    setErrorMessage,
+    minValue,
+    maxValue,
+    onChange,
+    page,
+    absoluteMinValue,
+    absoluteMaxValue,
+  ]);
 
   return (
     <Stack direction="row" columnGap={2}>
