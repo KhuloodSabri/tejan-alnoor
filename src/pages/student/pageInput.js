@@ -50,7 +50,7 @@ export default function PageInput({
       return;
     }
 
-    setValue(Number(page));
+    setValue(Number(translateNumberToEnglish(page)));
     setErrorMessage(null);
   }, [
     setValue,

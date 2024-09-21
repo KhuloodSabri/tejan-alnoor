@@ -61,7 +61,7 @@ export default function AyahInput({
       return;
     }
 
-    setValue(surah.commulativeOffset + Number(ayah));
+    setValue(surah.commulativeOffset + Number(translateNumberToEnglish(ayah)));
     setErrorMessage(null);
   }, [
     surah,
