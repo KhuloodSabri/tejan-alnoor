@@ -2,16 +2,14 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 
 const BASE_URL =
-  "https://5nvqhwbweydlc2yfyoqca5dyie0sonpg.lambda-url.eu-north-1.on.aws/students";
+  window.location.hostname === "localhost"
+    ? "http://localhost:3033/supervisor/students"
+    : "https://5nvqhwbweydlc2yfyoqca5dyie0sonpg.lambda-url.eu-north-1.on.aws/students";
 
 const ADMIN_BASE_URL =
-  "https://dtoo4lhm5ojwgql5xfxpmo6nru0alhkp.lambda-url.eu-north-1.on.aws/students";
-
-const getToken = () => {
-  const url = new URL(window.location.href);
-  const params = new URLSearchParams(url.search);
-  return params.get("token");
-};
+  window.location.hostname === "localhost"
+    ? "http://localhost:3033/admin"
+    : "https://dtoo4lhm5ojwgql5xfxpmo6nru0alhkp.lambda-url.eu-north-1.on.aws/students";
 
 export const useStudents = () => {
   const [data, setData] = useState([]);
