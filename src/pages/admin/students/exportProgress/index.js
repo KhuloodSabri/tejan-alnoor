@@ -2,16 +2,18 @@ import { Button, Link, Stack, Typography } from "@mui/material";
 import React from "react";
 import { exportStudentProgress } from "../../../../services/students";
 import LoadingButton from "@mui/lab/LoadingButton";
-import { Link as RouterLink } from "react-router-dom";
+import { useAuth0 } from "@auth0/auth0-react";
 
-export default function ExportProgressPage({}) {
+export default function ExportProgressPage() {
   const [loading, setLoading] = React.useState(false);
   const [exportUrl, setExportUrl] = React.useState(null);
+  const { getAccessTokenSilently } = useAuth0();
 
   const handleClick = async () => {
     setLoading(true);
     setExportUrl(null);
-    const { spreadsheetId } = await exportStudentProgress();
+    const token = await getAccessTokenSilently({});
+    const { spreadsheetId } = await exportStudentProgress(token);
     console.log("eresult", spreadsheetId);
     setExportUrl(`https://docs.google.com/spreadsheets/d/${spreadsheetId}`);
     setLoading(false);

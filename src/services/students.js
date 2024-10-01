@@ -8,7 +8,7 @@ const BASE_URL =
 
 const ADMIN_BASE_URL =
   window.location.hostname === "localhost"
-    ? "http://localhost:3033/admin"
+    ? "http://localhost:3033/admin/students"
     : "https://dtoo4lhm5ojwgql5xfxpmo6nru0alhkp.lambda-url.eu-north-1.on.aws/students";
 
 export const useStudents = () => {
@@ -83,9 +83,14 @@ export const updateStudentProgress = async (studentId, updates) => {
   return response.data;
 };
 
-export const exportStudentProgress = async () => {
+export const exportStudentProgress = async (token) => {
   const url = `${ADMIN_BASE_URL}/exportProgress`;
-  const response = await axios.get(url);
+  const response = await axios.get(url, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
   if (response.status !== 200) {
     throw new Error("Failed to export student progress");

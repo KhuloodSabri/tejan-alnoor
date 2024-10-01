@@ -14,6 +14,8 @@ import createCache from "@emotion/cache";
 import StudenPage from "./pages/student";
 import { useNavigate } from "react-router-dom";
 import ExportProgressPage from "./pages/admin/students/exportProgress";
+import AuthProvider from "./components/authProvider";
+import AdminPage from "./pages/admin";
 
 // Create rtl cache
 const cacheRtl = createCache({
@@ -40,50 +42,55 @@ function App() {
   return (
     <CacheProvider value={cacheRtl}>
       <ThemeProvider theme={theme}>
-        <div dir="rtl">
-          <Stack
-            sx={{
-              background: `linear-gradient(to bottom, ${colors.teal[50]}, 30%, ${colors.teal[300]})`,
-              minHeight: "100vh",
-            }}
-          >
-            <Box sx={{ maxWidth: 250, maxHeight: 250, mx: "auto", mt: 2 }}>
-              <img
-                src="/tejan-alnoor/logo2.png"
-                alt="logo"
-                style={{ maxWidth: "100%" }}
-              />
-            </Box>
-
-            <Card
-              elevation={8}
+        <AuthProvider>
+          <div dir="rtl">
+            <Stack
               sx={{
-                maxWidth: 700,
-                mx: "auto",
-                mt: 2,
-                py: 5,
-                px: { xs: 2, md: 5 },
-                boxSizing: "border-box",
-                minWidth: "min(600px, calc(100vw - 40px))",
-                borderRadius: 4,
-                minHeight: "calc(100vh - 250px)",
+                background: `linear-gradient(to bottom, ${colors.teal[50]}, 30%, ${colors.teal[300]})`,
+                minHeight: "100vh",
               }}
             >
-              <Routes>
-                <Route path="/tejan-alnoor" element={<SearchPage />} />
-                <Route
-                  path="/tejan-alnoor/students/:studentId"
-                  element={<StudenPage />}
+              <Box sx={{ maxWidth: 250, maxHeight: 250, mx: "auto", mt: 2 }}>
+                <img
+                  src="/tejan-alnoor/logo2.png"
+                  alt="logo"
+                  style={{ maxWidth: "100%" }}
                 />
-                <Route
-                  path="/tejan-alnoor/admin/students/exportProgress"
-                  element={<ExportProgressPage />}
-                />
-                {/* <Route path="/contact" element={<Contact />} /> */}
-              </Routes>
-            </Card>
-          </Stack>
-        </div>
+              </Box>
+
+              <Card
+                elevation={8}
+                sx={{
+                  maxWidth: 700,
+                  mx: "auto",
+                  mt: 2,
+                  py: 5,
+                  px: { xs: 2, md: 5 },
+                  boxSizing: "border-box",
+                  minWidth: "min(600px, calc(100vw - 40px))",
+                  borderRadius: 4,
+                  minHeight: "calc(100vh - 250px)",
+                }}
+              >
+                <Routes>
+                  <Route path="/tejan-alnoor" element={<SearchPage />} />
+                  <Route
+                    path="/tejan-alnoor/students/:studentId"
+                    element={<StudenPage />}
+                  />
+
+                  <Route path="/tejan-alnoor/admin" element={<AdminPage />}>
+                    <Route
+                      path="students/exportProgress"
+                      element={<ExportProgressPage />}
+                    />
+                  </Route>
+                  {/* <Route path="/contact" element={<Contact />} /> */}
+                </Routes>
+              </Card>
+            </Stack>
+          </div>
+        </AuthProvider>
       </ThemeProvider>
     </CacheProvider>
   );
