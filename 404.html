@@ -22,8 +22,8 @@
       const newUrl = `${window.location.origin}/tejan-alnoor${newSearchParams}${currentHash}`;
 
       if (
-        currentSearch.includes("?code=") ||
-        currentSearch.includes("&code=")
+        currentSearch?.includes("?code=") ||
+        currentSearch?.includes("&code=")
       ) {
         setTimeout(() => {
           // Redirect to the new URL
