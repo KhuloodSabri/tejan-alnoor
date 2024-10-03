@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Auth0Provider } from "@auth0/auth0-react";
 import { authConfig } from "../utils/auth";
 
-export default function AuthProvider({ redirectPath, children }) {
+export default function AuthProvider({ children }) {
   const navigate = useNavigate();
 
   const onRedirectCallback = (appState) => {
@@ -20,11 +20,11 @@ export default function AuthProvider({ redirectPath, children }) {
       clientId={authConfig.clientId}
       onRedirectCallback={onRedirectCallback}
       authorizationParams={{
-        redirect_uri: `${window.location.origin}/tejan-alnoor${
-          redirectPath ? "/" : ""
-        }${redirectPath ?? ""}`,
+        redirect_uri: `${window.location.origin}/tejan-alnoor`,
         audience: authConfig.audience,
       }}
+      useRefreshTokens={true}
+      cacheLocation="localstorage"
     >
       {children}
     </Auth0Provider>

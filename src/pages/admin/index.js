@@ -1,5 +1,4 @@
 import React from "react";
-import AuthProvider from "../../components/authProvider";
 import { Outlet, useLocation, Link as RouterLink } from "react-router-dom";
 
 import {
@@ -25,32 +24,53 @@ import { useAuth0 } from "@auth0/auth0-react";
 import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
 import SyncIcon from "@mui/icons-material/Sync";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import MenuIcon from "@mui/icons-material/Menu";
 import PersonIcon from "@mui/icons-material/Person";
+import AuthButton from "../../components/authButton";
 
-function AdminPageContent() {
-  const { user, isAuthenticated, isLoading, loginWithRedirect, logout } =
+export default function AdminPage() {
+  const { user, isAuthenticated, isLoading, loginWithPopup, logout } =
     useAuth0();
   const location = useLocation();
   const isRootPage = location.pathname === "/tejan-alnoor/admin";
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [profileEl, setProfileEl] = React.useState(null);
   const [logoutPopperOpen, setLogoutPopperOpen] = React.useState(false);
 
   React.useEffect(() => {
-    if (!isAuthenticated && !isLoading) {
-      loginWithRedirect(); // Redirects to login if not authenticated
-    }
-  }, [isAuthenticated, isLoading, loginWithRedirect]);
+    const handleLogin = async () => {
+      if (!isAuthenticated && !isLoading) {
+        await loginWithPopup();
+      }
+    };
+
+    handleLogin();
+  }, [isAuthenticated, isLoading, loginWithPopup]);
 
   const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
+    setProfileEl(event.currentTarget);
     setLogoutPopperOpen((prev) => !prev);
   };
 
-  if (isLoading) {
+  console.log("user", user);
+  console.log("isAuthenticated", isAuthenticated);
+  console.log("isLoading", isLoading);
+
+  if (isLoading || !isAuthenticated) {
     return (
       <Box width="fit-content" mx="auto" mt={10}>
-        <CircularProgress />
+        {!isLoading && (
+          <Typography variant="h6">
+            يجب تسجيل الدخول. اضغط هنا ل
+            <Button onClick={loginWithPopup}>تسجيل الدخول</Button>
+          </Typography>
+        )}
+        {isLoading && (
+          <Typography variant="h6">يجب إتمام تسجيل الدخول</Typography>
+        )}
+        {isLoading && (
+          <Box width="fit-content" mx="auto" mt={1}>
+            <CircularProgress />
+          </Box>
+        )}
       </Box>
     );
   }
@@ -113,7 +133,7 @@ function AdminPageContent() {
               </Button>
               <Popper
                 open={logoutPopperOpen}
-                anchorEl={anchorEl}
+                anchorEl={profileEl}
                 placement="bottom-end"
                 transition
               >
@@ -188,12 +208,4 @@ function AdminPageContent() {
   }
 
   return null;
-}
-
-export default function AdminPage() {
-  return (
-    <AuthProvider redirectPath="admin">
-      <AdminPageContent />
-    </AuthProvider>
-  );
 }

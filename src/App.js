@@ -1,12 +1,22 @@
-import logo from "./logo.svg";
 import "./App.css";
-import { useStudents } from "./services/students";
-import FuzzySearch from "fuzzy-search";
-import { useEffect, useMemo } from "react";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-import { Box, Card, colors, Stack } from "@mui/material";
+
+import React, { useEffect } from "react";
+import { Routes, Route, Link as RouterLink } from "react-router-dom";
+
+import {
+  Box,
+  Button,
+  Card,
+  ClickAwayListener,
+  colors,
+  Fade,
+  IconButton,
+  Paper,
+  Popper,
+  Stack,
+} from "@mui/material";
 import SearchPage from "./pages/search";
-import { createTheme, ThemeProvider, Theme } from "@mui/material/styles";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { CacheProvider } from "@emotion/react";
 import { prefixer } from "stylis";
 import rtlPlugin from "stylis-plugin-rtl";
@@ -16,6 +26,8 @@ import { useNavigate } from "react-router-dom";
 import ExportProgressPage from "./pages/admin/students/exportProgress";
 import AuthProvider from "./components/authProvider";
 import AdminPage from "./pages/admin";
+import MenuIcon from "@mui/icons-material/Menu";
+import AuthButton from "./components/authButton";
 
 // Create rtl cache
 const cacheRtl = createCache({
@@ -29,6 +41,8 @@ const theme = createTheme({
 
 function App() {
   const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = React.useState(false);
+  const [menuEl, setMenuEl] = React.useState(null);
 
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -58,36 +72,85 @@ function App() {
                 />
               </Box>
 
-              <Card
-                elevation={8}
-                sx={{
-                  maxWidth: 700,
-                  mx: "auto",
-                  mt: 2,
-                  py: 5,
-                  px: { xs: 2, md: 5 },
-                  boxSizing: "border-box",
-                  minWidth: "min(600px, calc(100vw - 40px))",
-                  borderRadius: 4,
-                  minHeight: "calc(100vh - 250px)",
-                }}
-              >
-                <Routes>
-                  <Route path="/tejan-alnoor" element={<SearchPage />} />
-                  <Route
-                    path="/tejan-alnoor/students/:studentId"
-                    element={<StudenPage />}
-                  />
-
-                  <Route path="/tejan-alnoor/admin" element={<AdminPage />}>
+              <Box maxWidth={700} mx="auto" position={"relative"}>
+                <Box position="absolute" top={-170}>
+                  <ClickAwayListener onClickAway={() => setMenuOpen(false)}>
+                    <Box>
+                      <IconButton
+                        onClick={(event) => {
+                          setMenuEl(event.currentTarget);
+                          setMenuOpen((prev) => !prev);
+                        }}
+                      >
+                        <MenuIcon />
+                      </IconButton>
+                      <Popper
+                        open={menuOpen}
+                        anchorEl={menuEl}
+                        placement="bottom-start"
+                        transition
+                      >
+                        {({ TransitionProps }) => (
+                          <Fade {...TransitionProps} timeout={350}>
+                            <Paper>
+                              <Box>
+                                <Button
+                                  fullWidth
+                                  component={RouterLink}
+                                  to="/tejan-alnoor"
+                                >
+                                  الصفحة الرئيسية
+                                </Button>
+                              </Box>
+                              <Box>
+                                <Button
+                                  fullWidth
+                                  component={RouterLink}
+                                  to="/tejan-alnoor/admin"
+                                >
+                                  صفحة الأدمن
+                                </Button>
+                              </Box>
+                              <Box>
+                                <AuthButton />
+                              </Box>
+                            </Paper>
+                          </Fade>
+                        )}
+                      </Popper>
+                    </Box>
+                  </ClickAwayListener>
+                </Box>
+                <Card
+                  elevation={8}
+                  sx={{
+                    maxWidth: 700,
+                    mx: "auto",
+                    mt: 2,
+                    py: 5,
+                    px: { xs: 2, md: 5 },
+                    boxSizing: "border-box",
+                    minWidth: "min(600px, calc(100vw - 40px))",
+                    borderRadius: 4,
+                    minHeight: "calc(100vh - 250px)",
+                  }}
+                >
+                  <Routes>
+                    <Route path="/tejan-alnoor" element={<SearchPage />} />
                     <Route
-                      path="students/exportProgress"
-                      element={<ExportProgressPage />}
+                      path="/tejan-alnoor/students/:studentId"
+                      element={<StudenPage />}
                     />
-                  </Route>
-                  {/* <Route path="/contact" element={<Contact />} /> */}
-                </Routes>
-              </Card>
+
+                    <Route path="/tejan-alnoor/admin" element={<AdminPage />}>
+                      <Route
+                        path="students/exportProgress"
+                        element={<ExportProgressPage />}
+                      />
+                    </Route>
+                  </Routes>
+                </Card>
+              </Box>
             </Stack>
           </div>
         </AuthProvider>
