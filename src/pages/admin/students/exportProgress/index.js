@@ -12,7 +12,9 @@ export default function ExportProgressPage() {
   const handleClick = async () => {
     setLoading(true);
     setExportUrl(null);
-    const token = await getAccessTokenSilently({});
+    const token = await getAccessTokenSilently({
+      // authorizationParams: { scope: "openid profile email offline_access" },
+    });
     const { spreadsheetId } = await exportStudentProgress(token);
     console.log("eresult", spreadsheetId);
     setExportUrl(`https://docs.google.com/spreadsheets/d/${spreadsheetId}`);

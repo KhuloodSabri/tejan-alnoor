@@ -20,8 +20,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { Link as RouterLink } from "react-router-dom";
 
 export default function StudenPage() {
-  const { studentId: studentIdStr } = useParams();
-  const studentId = parseInt(studentIdStr);
+  const { studentId } = useParams();
 
   const { data: student, loading } = useStudent(studentId);
   const theme = useTheme();

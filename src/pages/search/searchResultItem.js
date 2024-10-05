@@ -17,9 +17,7 @@ export default function SearchResultItem({ option, ...props }) {
 
     const newList = [
       option.studentID,
-      ...existingList.filter(
-        (studentID) => studentID !== Number(option.studentID)
-      ),
+      ...existingList.filter((studentID) => studentID !== option.studentID),
     ]
       .filter((x) => !_.isEmpty(`${x}`))
       .slice(0, 7);

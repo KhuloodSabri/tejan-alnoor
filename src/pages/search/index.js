@@ -103,9 +103,7 @@ export default function SearchPage() {
             {recentSearches.map((id) => (
               <Box key={id}>
                 <SearchResultItem
-                  option={students.find(
-                    (student) => student.studentID === Number(id)
-                  )}
+                  option={students.find((student) => student.studentID === id)}
                   sx={{ px: 2 }}
                 />
               </Box>

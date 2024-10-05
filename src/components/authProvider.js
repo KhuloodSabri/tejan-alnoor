@@ -22,9 +22,11 @@ export default function AuthProvider({ children }) {
       authorizationParams={{
         redirect_uri: `${window.location.origin}/tejan-alnoor`,
         audience: authConfig.audience,
+        scope: "openid profile email offline_access",
       }}
       useRefreshTokens={true}
       cacheLocation="localstorage"
+      useRefreshTokensFallback={true}
     >
       {children}
     </Auth0Provider>
