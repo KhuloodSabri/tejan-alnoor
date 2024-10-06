@@ -76,8 +76,6 @@ export default function AdminPage() {
   }
 
   if (isAuthenticated) {
-    console.log(user);
-
     if (!user["tejan-alnoor/roles"].includes("admin")) {
       return (
         <Alert severity="error">
@@ -189,7 +187,7 @@ export default function AdminPage() {
                     },
                   }}
                   component={RouterLink}
-                  to="students/exportProgress"
+                  to="students/importStudents"
                 >
                   <ListItemIcon sx={{ color: colors.blue["500"] }}>
                     <PlaylistAddIcon />

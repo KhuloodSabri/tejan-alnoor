@@ -98,3 +98,19 @@ export const exportStudentProgress = async (token) => {
 
   return response.data;
 };
+
+export const createStudents = async (token, students) => {
+  const url = `${ADMIN_BASE_URL}`;
+  const response = await axios.post(url, students, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (response.status !== 200) {
+    throw new Error("Failed to create students");
+  }
+
+  return response.data;
+};

@@ -28,6 +28,7 @@ import AuthProvider from "./components/authProvider";
 import AdminPage from "./pages/admin";
 import MenuIcon from "@mui/icons-material/Menu";
 import AuthButton from "./components/authButton";
+import ImportStudents from "./pages/admin/students/importStudents";
 
 // Create rtl cache
 const cacheRtl = createCache({
@@ -146,6 +147,10 @@ function App() {
                       <Route
                         path="students/exportProgress"
                         element={<ExportProgressPage />}
+                      />
+                      <Route
+                        path="students/importStudents"
+                        element={<ImportStudents />}
                       />
                     </Route>
                   </Routes>
