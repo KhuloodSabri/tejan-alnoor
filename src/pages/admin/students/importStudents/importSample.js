@@ -1,4 +1,4 @@
-import { Box, Button, Typography } from "@mui/material";
+import { Button, Typography } from "@mui/material";
 import React from "react";
 
 const sampleData = `اسم الطالب/ة,الجنس,اسم المشرف/ة,المستوى,الدفعة,سنة الانضمام,فصل الانضمام,شهر الانضمام,رقم الهاتف

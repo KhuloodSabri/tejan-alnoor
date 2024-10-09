@@ -6,6 +6,22 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { createStudents } from "../../../../services/students";
 import ImportSample from "./importSample";
 
+const cleanPhoneNumber = (phoneNumber) => {
+  return `${phoneNumber}`.replace(
+    /[\s\u0000-\u001F\u007F-\u00A0\u200B-\u200D\u200E-\u206F]/g,
+    ""
+  );
+};
+
+const formatPhoneNumber = (phoneNumber) => {
+  // for scinetific notation
+  const hasNonDigits = `${phoneNumber}`
+    .split("")
+    .find((letter) => isNaN(Number(letter)));
+
+  return hasNonDigits ? `${Number(phoneNumber)}` : `${phoneNumber}`;
+};
+
 export default function ImportStudents() {
   const [error, setError] = React.useState(false);
   const [validationErrorMessages, setValidationErrorMessages] = React.useState(
@@ -147,21 +163,25 @@ export default function ImportStudents() {
       }
 
       if (row["رقم الهاتف"]) {
-        if (isNaN(Number(row["رقم الهاتف"]))) {
+        let phoneNumber = cleanPhoneNumber(row["رقم الهاتف"]);
+        if (isNaN(Number(phoneNumber))) {
           errors.push(
-            `رقم الهاتف للطالب/ة ${row["اسم الطالب/ة"]} في الصف ${
-              index + 2
-            } ليست رقما`
+            `رقم الهاتف للطالب/ة ${phoneNumber} في الصف ${index + 2} ليست رقما`
           );
-        } else if (
-          `${row["رقم الهاتف"]}`.length !== 10 &&
-          `${row["رقم الهاتف"]}`.length !== 7
-        ) {
-          errors.push(
-            `رقم الهاتف للطالب/ة ${row["اسم الطالب/ة"]} في الصف ${
-              index + 2
-            } يجب أن يكون 7 أرقام أو 10 رقما (مع الكود الدولي)`
-          );
+        } else {
+          phoneNumber = formatPhoneNumber(phoneNumber);
+
+          if (
+            `${phoneNumber}`.length !== 10 &&
+            `${phoneNumber}`.length !== 12 &&
+            `${phoneNumber}`.length !== 14
+          ) {
+            errors.push(
+              `رقم الهاتف للطالب/ة ${row["اسم الطالب/ة"]} في الصف ${
+                index + 2
+              } يجب أن يكون 7 أرقام أو 12 أو 14 رقما (مع الكود الدولي)`
+            );
+          }
         }
       }
     });
@@ -211,7 +231,7 @@ export default function ImportStudents() {
         joinYear: row["سنة الانضمام"],
         joinSemester: row["فصل الانضمام"],
         joinMonth: row["شهر الانضمام"],
-        phoneNumber: row["رقم الهاتف"],
+        phoneNumber: formatPhoneNumber(cleanPhoneNumber(row["رقم الهاتف"])),
       };
     });
   }, []);
@@ -220,7 +240,13 @@ export default function ImportStudents() {
     if (file) {
       Papa.parse(file, {
         header: true, // Set to true if the first row contains headers
-        dynamicTyping: true, // Automatically type-cast fields
+        dynamicTyping: (field) => {
+          if (field === "رقم الهاتف") {
+            return false;
+          }
+
+          return true;
+        },
         complete: async function (results) {
           console.log(results.data); // Parsed data
           const errors = validateData(results.data);
