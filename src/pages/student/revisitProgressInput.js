@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrowLeft";
 import React from "react";
-import { commulativeSuar, getCommulativeAyahDetails } from "../../utils/surah";
+import { getCommulativeAyahDetails } from "../../utils/surah";
 import { translateNumberToArabic } from "../../utils/numbers";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";

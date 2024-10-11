@@ -103,7 +103,7 @@ export default function StudenPage() {
         progressKey="memorizingProgress"
         description="التسميع حتى صفحة "
       />
-      <RevisitProgressInput student={student} />
+      {student.start && <RevisitProgressInput student={student} />}
 
       <SimpleProgressInput
         student={student}

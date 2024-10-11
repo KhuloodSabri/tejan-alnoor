@@ -1,16 +1,10 @@
 import React, { useCallback, useState } from "react";
 import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogTitle from "@mui/material/DialogTitle";
 import { getNegativeProgressPrefix, getPositiveProgressPrefix } from "./utils";
-import { Autocomplete, Box, colors, Stack, Typography } from "@mui/material";
-import { getCommulativeAyahDetails, suar } from "../../utils/surah";
-import FuzzySearch from "fuzzy-search";
-import { normalizeString } from "../../utils/string";
+import { colors, Stack, Typography } from "@mui/material";
 import AyahInput from "./ayahInput";
 import { updateStudentProgress } from "../../services/students";
 import LoadingButton from "@mui/lab/LoadingButton";
