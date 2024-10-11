@@ -12,7 +12,7 @@ const ADMIN_BASE_URL =
     : "https://dtoo4lhm5ojwgql5xfxpmo6nru0alhkp.lambda-url.eu-north-1.on.aws/configs";
 
 export const useCurrentSemesterDetails = () => {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState();
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {

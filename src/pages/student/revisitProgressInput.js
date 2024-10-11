@@ -27,7 +27,6 @@ import {
 import RevisitProgressDialog from "./revisitProgressDialog";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 
 function ProgressLabel({ position, text, color }) {
   return (

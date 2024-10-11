@@ -40,7 +40,7 @@ export default function StudenPage() {
     );
   }
 
-  if (!student) {
+  if (!student || !currentSemesterDetails) {
     return;
   }
 
