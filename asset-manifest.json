@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/tejan-alnoor/static/css/main.f855e6bc.css",
-    "main.js": "/tejan-alnoor/static/js/main.fb43a6e4.js",
+    "main.js": "/tejan-alnoor/static/js/main.faf01fef.js",
     "static/js/453.eff3270a.chunk.js": "/tejan-alnoor/static/js/453.eff3270a.chunk.js",
     "index.html": "/tejan-alnoor/index.html",
     "main.f855e6bc.css.map": "/tejan-alnoor/static/css/main.f855e6bc.css.map",
-    "main.fb43a6e4.js.map": "/tejan-alnoor/static/js/main.fb43a6e4.js.map",
+    "main.faf01fef.js.map": "/tejan-alnoor/static/js/main.faf01fef.js.map",
     "453.eff3270a.chunk.js.map": "/tejan-alnoor/static/js/453.eff3270a.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.f855e6bc.css",
-    "static/js/main.fb43a6e4.js"
+    "static/js/main.faf01fef.js"
   ]
 }
