@@ -18,15 +18,19 @@ import SimpleProgressInput from "./simpleProgressInput";
 import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrowLeft";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { Link as RouterLink } from "react-router-dom";
+import { useCurrentSemesterDetails } from "../../services/configs";
 
 export default function StudenPage() {
   const { studentId } = useParams();
 
   const { data: student, loading } = useStudent(studentId);
+  const { data: currentSemesterDetails, currentSemesterDetailsLoading } =
+    useCurrentSemesterDetails();
+
   const theme = useTheme();
   const smScreen = useMediaQuery(theme.breakpoints.up("sm"));
 
-  if (loading) {
+  if (loading || currentSemesterDetailsLoading) {
     return (
       <Stack justifyContent="center" mt={5} alignItems="center">
         <Box width="fit-content">
@@ -103,7 +107,10 @@ export default function StudenPage() {
         progressKey="memorizingProgress"
         description="التسميع حتى صفحة "
       />
-      {student.start && <RevisitProgressInput student={student} />}
+      <RevisitProgressInput
+        student={student}
+        currentSemesterDetails={currentSemesterDetails}
+      />
 
       <SimpleProgressInput
         student={student}

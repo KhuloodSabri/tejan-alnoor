@@ -6,10 +6,7 @@ import { Autocomplete, Stack, Typography } from "@mui/material";
 import { commulativeSuar } from "../../utils/surah";
 import FuzzySearch from "fuzzy-search";
 import { normalizeString } from "../../utils/string";
-import {
-  translateNumberToEnglish,
-  translateNumberToArabic,
-} from "../../utils/numbers";
+import { translateNumberToEnglish } from "../../utils/numbers";
 
 export default function AyahInput({
   label,
@@ -17,8 +14,6 @@ export default function AyahInput({
   setErrorMessage,
   minValue,
   maxValue,
-  absoluteMinValue,
-  absoluteMaxValue,
   onChange,
 }) {
   const [surah, setSurah] = useState();
@@ -45,13 +40,6 @@ export default function AyahInput({
         (maxValue && surah.commulativeOffset + Number(ayah) > maxValue)
       ) {
         error = "يجب أن تكون بداية المراجعة المدخلة أصغر من نهايتها";
-      } else if (
-        surah.commulativeOffset + Number(ayah) < absoluteMinValue ||
-        surah.commulativeOffset + Number(ayah) > absoluteMaxValue
-      ) {
-        error = `سورة ${surah.surah} آية (${translateNumberToArabic(
-          ayah
-        )}) ليست ضمن خطة الفصل الحالي`;
       }
     }
 
@@ -63,17 +51,7 @@ export default function AyahInput({
 
     setValue(surah.commulativeOffset + Number(translateNumberToEnglish(ayah)));
     setErrorMessage(null);
-  }, [
-    surah,
-    ayah,
-    setValue,
-    setErrorMessage,
-    minValue,
-    maxValue,
-    onChange,
-    absoluteMinValue,
-    absoluteMaxValue,
-  ]);
+  }, [surah, ayah, setValue, setErrorMessage, minValue, maxValue, onChange]);
 
   const filterOptions = (options, { inputValue }) => {
     const normalizedOptions =

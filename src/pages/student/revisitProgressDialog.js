@@ -109,6 +109,7 @@ export default function RevisitProgressDialog({
     setFromValue(null);
     setToValue(null);
     setLoading(false);
+    onClose();
   };
 
   return (
@@ -143,8 +144,6 @@ export default function RevisitProgressDialog({
             <AyahInput
               label="من"
               maxValue={toValue}
-              absoluteMinValue={student.start}
-              absoluteMaxValue={student.end}
               setValue={setFromValue}
               setErrorMessage={setFromErrorMessage}
               onChange={onChange}
@@ -153,8 +152,6 @@ export default function RevisitProgressDialog({
             <PageInput
               label="من"
               maxValue={toValue}
-              absoluteMinValue={student.start}
-              absoluteMaxValue={student.end}
               setValue={setFromValue}
               setErrorMessage={setFromErrorMessage}
               onChange={onChange}
@@ -164,8 +161,6 @@ export default function RevisitProgressDialog({
             <AyahInput
               label="إلى"
               minValue={fromValue}
-              absoluteMinValue={student.start}
-              absoluteMaxValue={student.end}
               setValue={setToValue}
               setErrorMessage={setToErrorMessage}
               onChange={onChange}
@@ -174,8 +169,6 @@ export default function RevisitProgressDialog({
             <PageInput
               label="إلى"
               minValue={fromValue}
-              absoluteMinValue={student.start}
-              absoluteMaxValue={student.end}
               setValue={setToValue}
               setErrorMessage={setToErrorMessage}
               onChange={onChange}
