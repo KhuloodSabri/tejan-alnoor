@@ -83,7 +83,7 @@ export default function RevisitProgressInput({
   const visibleRevisitInterval = useMemo(() => {
     const startWeek = getStudentSemesterStartWeek(student, visibleSemester);
 
-    let endWeek = startWeek + getSemesterMonthsCount(visibleSemester) * 4;
+    let endWeek = startWeek + getSemesterMonthsCount(visibleSemester) * 4 - 1;
 
     if (!student.levelRevisitWeeksPlan[startWeek]) {
       return undefined;
@@ -92,11 +92,6 @@ export default function RevisitProgressInput({
     while (!student.levelRevisitWeeksPlan[endWeek]) {
       endWeek--;
     }
-
-    console.log([
-      student.levelRevisitWeeksPlan[startWeek],
-      student.levelRevisitWeeksPlan[endWeek],
-    ]);
 
     return [
       student.levelRevisitWeeksPlan[startWeek][0],
@@ -129,24 +124,47 @@ export default function RevisitProgressInput({
   };
 
   const rangesWithDetails = visibleRevisitInterval
-    ? (revisitProgress ?? []).map((range) => [
-        {
-          offset: range[0] - visibleRevisitInterval[0],
-          ...(student.progressUnit === "ayah"
-            ? getCommulativeAyahDetails(range[0])
-            : { page: range[0] }),
-        },
-        {
-          offset: range[1] - visibleRevisitInterval[0],
-          ...(student.progressUnit === "ayah"
-            ? getCommulativeAyahDetails(range[1])
-            : { page: range[1] }),
-        },
-      ])
+    ? (revisitProgress ?? [])
+        .filter((range) => {
+          if (range[1] < visibleRevisitInterval[0]) {
+            return false;
+          }
+
+          if (range[0] > visibleRevisitInterval[1]) {
+            return false;
+          }
+
+          return true;
+        })
+        .map((range) => {
+          const start =
+            range[0] < visibleRevisitInterval[0]
+              ? visibleRevisitInterval[0]
+              : range[0];
+          const end =
+            range[1] > visibleRevisitInterval[1]
+              ? visibleRevisitInterval[1]
+              : range[1];
+
+          return [
+            {
+              offset: start - visibleRevisitInterval[0],
+              ...(student.progressUnit === "ayah"
+                ? getCommulativeAyahDetails(start)
+                : { page: start }),
+            },
+            {
+              offset: end - visibleRevisitInterval[0],
+              ...(student.progressUnit === "ayah"
+                ? getCommulativeAyahDetails(end)
+                : { page: end }),
+            },
+          ];
+        })
     : [];
 
   const total =
-    visibleRevisitInterval?.[1] ?? 0 - visibleRevisitInterval?.[0] ?? 0 + 1;
+    (visibleRevisitInterval?.[1] ?? 0) - (visibleRevisitInterval?.[0] ?? 0) + 1;
 
   return (
     <Stack rowGap={1}>
@@ -198,7 +216,7 @@ export default function RevisitProgressInput({
           إزالة مراجعة{" "}
         </Button>
       </Stack>
-      <Stack>
+      <Stack mt={1}>
         <Stack
           direction="row"
           justifyContent="space-between"
@@ -255,6 +273,7 @@ export default function RevisitProgressInput({
             }}
             alignItems={"center"}
             justifyContent={"center"}
+            mb={3}
           >
             <Typography color={colors.grey["400"]} textAlign="center">
               لم يتم تحديث خطة المراجعة للفصل الدراسي الحالي
@@ -266,7 +285,6 @@ export default function RevisitProgressInput({
             <Box
               minWidth="100%"
               minHeight={50}
-              // mt={1}
               sx={{
                 border: `2px solid ${colors.teal["A700"]}`,
                 borderRadius: 3,
@@ -324,10 +342,12 @@ export default function RevisitProgressInput({
                         } // inclusive
                         minHeight={50}
                         borderRadius={
-                          range[0].offset === 0
+                          range[0].offset === 0 && range[1].offset === total - 1
+                            ? "10px"
+                            : range[0].offset === 0
                             ? "10px 0 0 10px"
-                            : range[1].offset === total
-                            ? "0 10px 0 10px"
+                            : range[1].offset === total - 1
+                            ? "0 10px 10px 0px"
                             : 0
                         }
                         onClick={() => {
