@@ -12,18 +12,17 @@ import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrow
 import React, { useMemo } from "react";
 import { getCommulativeAyahDetails } from "../../utils/surah";
 import { translateNumberToArabic } from "../../utils/numbers";
-import AddIcon from "@mui/icons-material/Add";
-import RemoveIcon from "@mui/icons-material/Remove";
-import _ from "lodash";
 import {
-  getNegativeProgressPrefix,
   getNextSemester,
-  getPositiveProgressPrefix,
   getPrevSemester,
   getSemesterMonthsCount,
   getSemesterName,
   getStudentSemesterStartWeek,
-} from "./utils";
+} from "../../utils/semesters";
+import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
+import _ from "lodash";
+import { getNegativeProgressPrefix, getPositiveProgressPrefix } from "./utils";
 import RevisitProgressDialog from "./revisitProgressDialog";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";

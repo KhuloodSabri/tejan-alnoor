@@ -73,7 +73,12 @@ function App() {
                 />
               </Box>
 
-              <Box maxWidth={700} mx="auto" position={"relative"}>
+              <Box
+                maxWidth={`calc(100vw - 30px)`}
+                mx="auto"
+                position={"relative"}
+                boxSizing={"border-box"}
+              >
                 <Box position="absolute" top={-170}>
                   <ClickAwayListener onClickAway={() => setMenuOpen(false)}>
                     <Box>
@@ -125,13 +130,13 @@ function App() {
                 <Card
                   elevation={8}
                   sx={{
-                    maxWidth: 700,
+                    maxWidth: `min(1000px, 100%)`,
                     mx: "auto",
                     mt: 2,
                     py: 5,
                     px: { xs: 2, md: 5 },
                     boxSizing: "border-box",
-                    minWidth: "min(600px, calc(100vw - 40px))",
+                    minWidth: "min(600px, calc(100vw - 30px))",
                     borderRadius: 4,
                     minHeight: "calc(100vh - 250px)",
                   }}

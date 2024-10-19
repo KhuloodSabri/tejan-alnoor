@@ -5,6 +5,7 @@ import { Alert, Box, Divider, Stack } from "@mui/material";
 import { useAuth0 } from "@auth0/auth0-react";
 import { createStudents } from "../../../../services/students";
 import ImportSample from "./importSample";
+import ImportResult from "./importResult";
 
 const cleanPhoneNumber = (phoneNumber) => {
   return `${phoneNumber}`.replace(
@@ -32,6 +33,7 @@ export default function ImportStudents() {
   const [file, setFile] = React.useState(null);
   const [submittedSuccessfully, setSubmittedSuccessfully] =
     React.useState(false);
+  const [submitResult, setSubmitResult] = React.useState();
   const fileInput = React.useRef(null);
 
   const { getAccessTokenSilently } = useAuth0();
@@ -202,7 +204,6 @@ export default function ImportStudents() {
     });
 
     const phoneNumbersCount = data.reduce((acc, row) => {
-      console.log(row);
       if (!`${row["رقم الهاتف"] ?? ""}`?.trim()) return acc;
 
       return {
@@ -248,7 +249,6 @@ export default function ImportStudents() {
           return true;
         },
         complete: async function (results) {
-          console.log(results.data); // Parsed data
           const errors = validateData(results.data);
           if (errors.length > 0) {
             setValidationErrorMessages(errors);
@@ -257,7 +257,10 @@ export default function ImportStudents() {
             const token = await getAccessTokenSilently({});
             const students = mapRowsToStudents(results.data);
             try {
-              await createStudents(token, students);
+              setSubmitResult({
+                ...(await createStudents(token, students)),
+                inputStudents: students,
+              });
               setSubmittedSuccessfully(true);
             } catch (error) {
               console.error(error);
@@ -302,16 +305,8 @@ export default function ImportStudents() {
     setFile(files[0]);
   }, []);
 
-  useEffect(() => {
-    if (submittedSuccessfully) {
-      setTimeout(() => {
-        setSubmittedSuccessfully(false);
-      }, 3000);
-    }
-  }, [submittedSuccessfully]);
-
   if (submittedSuccessfully) {
-    return <Alert severity="success">تم إضافة الطلاب بنجاح</Alert>;
+    return <ImportResult {...submitResult} />;
   }
 
   return (

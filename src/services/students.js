@@ -114,3 +114,19 @@ export const createStudents = async (token, students) => {
 
   return response.data;
 };
+
+export const replaceStudents = async (token, students) => {
+  const url = `${ADMIN_BASE_URL}`;
+  const response = await axios.put(url, students, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (response.status !== 200) {
+    throw new Error("Failed to update students");
+  }
+
+  return response.data;
+};
