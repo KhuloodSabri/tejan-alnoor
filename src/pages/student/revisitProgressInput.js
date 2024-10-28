@@ -26,6 +26,7 @@ import { getNegativeProgressPrefix, getPositiveProgressPrefix } from "./utils";
 import RevisitProgressDialog from "./revisitProgressDialog";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import SemesterNavigator from "./semesterNavigator";
 
 function ProgressLabel({ position, text, color }) {
   return (
@@ -82,6 +83,13 @@ export default function RevisitProgressInput({
     const startWeek = getStudentSemesterStartWeek(student, visibleSemester);
 
     let endWeek = startWeek + getSemesterMonthsCount(visibleSemester) * 4 - 1;
+
+    if (
+      student.joinYear === visibleSemester.year &&
+      student.joinSemester === visibleSemester.semester
+    ) {
+      endWeek -= (student.joinMonth - 1) * 4;
+    }
 
     if (!student.levelRevisitWeeksPlan[startWeek]) {
       return undefined;
@@ -164,6 +172,13 @@ export default function RevisitProgressInput({
   const total =
     (visibleRevisitInterval?.[1] ?? 0) - (visibleRevisitInterval?.[0] ?? 0) + 1;
 
+  // not the current semester and frozen
+  const showFrozenLabel = (student.frozenSemesters || []).some(
+    (semester) =>
+      semester.year === visibleSemester.year &&
+      semester.semester === visibleSemester.semester
+  );
+
   return (
     <Stack rowGap={1}>
       <Box>
@@ -215,53 +230,13 @@ export default function RevisitProgressInput({
         </Button>
       </Stack>
       <Stack mt={1}>
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-          width="100%"
-          mt={1}
-          px={0.5}
-          boxSizing={"border-box"}
-        >
-          <Button
-            size="small"
-            sx={{ maxHeight: 16, fontSize: 13 }}
-            startIcon={<ArrowForwardIcon />}
-            onClick={() => {
-              setVisibleSemester(getPrevSemester(visibleSemester));
-            }}
-            disabled={
-              visibleSemester.year === student.joinTime.year &&
-              visibleSemester.semester === student.joinTime.semester
-            }
-          >
-            السابق
-          </Button>
-          <Typography
-            variant="body2"
-            component="div"
-            color={colors.teal["700"]}
-            fontSize={13}
-          >
-            {getSemesterName(visibleSemester)}
-          </Typography>
-          <Button
-            size="small"
-            sx={{ maxHeight: 16, fontSize: 13 }}
-            endIcon={<ArrowBackIcon />}
-            onClick={() => {
-              setVisibleSemester(getNextSemester(visibleSemester));
-            }}
-            disabled={
-              visibleSemester.year === currentSemesterDetails.year &&
-              visibleSemester.semester === currentSemesterDetails.semester
-            }
-          >
-            التالي
-          </Button>
-        </Stack>
-        {!visibleRevisitInterval && (
+        <SemesterNavigator
+          student={student}
+          currentSemesterDetails={currentSemesterDetails}
+          selectedSemester={visibleSemester}
+          setSelectedSemester={setVisibleSemester}
+        />
+        {(!visibleRevisitInterval || showFrozenLabel) && (
           <Stack
             minWidth="100%"
             minHeight={50}
@@ -274,11 +249,15 @@ export default function RevisitProgressInput({
             mb={3}
           >
             <Typography color={colors.grey["400"]} textAlign="center">
-              لم يتم تحديث خطة المراجعة للفصل الدراسي الحالي
+              {showFrozenLabel
+                ? student.gender === "male"
+                  ? "جمد الطالب التحاقه  بهذا الفصل الدراسي"
+                  : "جمدت الطالبة التحاقها بهذا الفصل الدراسي"
+                : "لم يتم تحديث خطة المراجعة للفصل الدراسي الحالي"}
             </Typography>
           </Stack>
         )}
-        {visibleRevisitInterval && (
+        {visibleRevisitInterval && !showFrozenLabel && (
           <Box width="100%">
             <Box
               minWidth="100%"

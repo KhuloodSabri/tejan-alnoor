@@ -7,7 +7,7 @@ import {
   Typography,
 } from "@mui/material";
 import LoadingButton from "@mui/lab/LoadingButton";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   translateNumberToArabic,
   translateNumberToEnglish,
@@ -19,6 +19,31 @@ import { updateStudentProgress } from "../../services/students";
 
 import { getPositiveProgressPrefix } from "./utils";
 
+function getNestedValue(obj, path) {
+  // Split the path into keys and indices
+  const keys = path.replace(/\[(\d+)\]/g, ".$1").split(".");
+
+  // Use reduce to traverse the object
+  return keys.reduce((acc, key) => {
+    // Return undefined if the key doesn't exist
+    return acc ? acc[key] : undefined;
+  }, obj);
+}
+
+function updateObjectAtPath(obj, path, value) {
+  // Convert the path into an array of keys, handling both dot and bracket notations
+  const keys = path.replace(/\[(\w+)\]/g, ".$1").split(".");
+
+  // Iterate through the keys, except for the last one
+  keys.slice(0, -1).reduce((acc, key) => {
+    // If the key doesn't exist, create an empty object
+    if (!acc[key]) acc[key] = {};
+    return acc[key];
+  }, obj)[keys[keys.length - 1]] = value; // Set the value at the final key
+
+  return obj;
+}
+
 export default function SimpleProgressInput({
   student,
   progressKey,
@@ -27,7 +52,7 @@ export default function SimpleProgressInput({
   const [editing, setEditing] = useState(false);
   const prefix = getPositiveProgressPrefix(student);
   const [value, setValue] = useState(
-    translateNumberToArabic(student[progressKey])
+    translateNumberToArabic(getNestedValue(student, progressKey) ?? "")
   );
   const [validationError, setValidationError] = useState(false);
   const [saveStatus, setSaveStatus] = useState({
@@ -52,9 +77,10 @@ export default function SimpleProgressInput({
     setSaveStatus({ loading: true, error: null });
 
     try {
-      await updateStudentProgress(student.studentID, {
-        [progressKey]: number,
-      });
+      await updateStudentProgress(
+        student.studentID,
+        updateObjectAtPath({}, progressKey, number)
+      );
 
       setSaveStatus({ loading: false, error: null });
       setEditing(false);
@@ -62,6 +88,12 @@ export default function SimpleProgressInput({
       setSaveStatus({ loading: false, error });
     }
   };
+
+  useEffect(() => {
+    setValue(
+      translateNumberToArabic(getNestedValue(student, progressKey) ?? "")
+    );
+  }, [student, progressKey]);
 
   return (
     <Stack

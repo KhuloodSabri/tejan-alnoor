@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useAuth0 } from "@auth0/auth0-react";
 
 const BASE_URL =
   window.location.hostname === "localhost"
@@ -99,6 +100,22 @@ export const exportStudentProgress = async (token) => {
   return response.data;
 };
 
+export const exportDetailedStudentProgress = async (token, year, semester) => {
+  const url = `${ADMIN_BASE_URL}/exportProgressDetailed?year=${year}&semester=${semester}`;
+  const response = await axios.get(url, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (response.status !== 200) {
+    throw new Error("Failed to export student progress");
+  }
+
+  return response.data;
+};
+
 export const createStudents = async (token, students) => {
   const url = `${ADMIN_BASE_URL}`;
   const response = await axios.post(url, students, {
@@ -129,4 +146,46 @@ export const replaceStudents = async (token, students) => {
   }
 
   return response.data;
+};
+
+export const useStudentsSummariesFolderUrl = () => {
+  const { getAccessTokenSilently } = useAuth0();
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    setLoading(true);
+    const fetchData = async () => {
+      try {
+        const token = await getAccessTokenSilently();
+
+        const url = `${ADMIN_BASE_URL}/summariesFolder`;
+        const response = await axios.get(url, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.status !== 200) {
+          throw new Error("Failed to get summaries folder");
+        }
+
+        setData(
+          `https://drive.google.com/drive/folders/${response.data.folderId}`
+        );
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [getAccessTokenSilently]);
+
+  return {
+    data,
+    loading,
+  };
 };

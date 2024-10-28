@@ -19,13 +19,16 @@ import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrow
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { Link as RouterLink } from "react-router-dom";
 import { useCurrentSemesterDetails } from "../../services/configs";
+import StudentTests from "./studentTests";
 
 export default function StudenPage() {
   const { studentId } = useParams();
 
   const { data: student, loading } = useStudent(studentId);
-  const { data: currentSemesterDetails, currentSemesterDetailsLoading } =
-    useCurrentSemesterDetails();
+  const {
+    data: currentSemesterDetails,
+    loading: currentSemesterDetailsLoading,
+  } = useCurrentSemesterDetails();
 
   const theme = useTheme();
   const smScreen = useMediaQuery(theme.breakpoints.up("sm"));
@@ -112,30 +115,9 @@ export default function StudenPage() {
         currentSemesterDetails={currentSemesterDetails}
       />
 
-      <SimpleProgressInput
+      <StudentTests
         student={student}
-        progressKey="test1"
-        description="الاختبار الأول بعلامة  "
-      />
-      <SimpleProgressInput
-        student={student}
-        progressKey="test2"
-        description="الاختبار الثاني بعلامة  "
-      />
-      <SimpleProgressInput
-        student={student}
-        progressKey="test3"
-        description="الاختبار الثالث بعلامة  "
-      />
-      <SimpleProgressInput
-        student={student}
-        progressKey="test4"
-        description="الاختبار الرابع بعلامة  "
-      />
-      <SimpleProgressInput
-        student={student}
-        progressKey="test5"
-        description="الاختبار الخامس بعلامة  "
+        currentSemesterDetails={currentSemesterDetails}
       />
     </Stack>
   );

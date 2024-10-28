@@ -1,7 +1,7 @@
 export function getStudentSemesterStartWeek(student, semesterDetails) {
-  const joinYear = student.joinTime.year;
-  const joinSemester = student.joinTime.semester;
-  const joinMonth = student.joinTime.semesterMonth;
+  const joinYear = student.joinYear;
+  const joinSemester = student.joinSemester;
+  const joinMonth = student.joinMonth;
   let monthsSinceJoin = (semesterDetails.year - joinYear) * 7;
 
   monthsSinceJoin += (semesterDetails.semester - 1) * 3; // 1 and 2 are 3 months

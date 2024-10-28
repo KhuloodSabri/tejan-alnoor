@@ -1,43 +1,111 @@
-import { Button, Link, Stack, Typography } from "@mui/material";
-import React from "react";
-import { exportStudentProgress } from "../../../../services/students";
-import LoadingButton from "@mui/lab/LoadingButton";
-import { useAuth0 } from "@auth0/auth0-react";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Divider,
+  MenuItem,
+  Select,
+  Stack,
+  TextField,
+} from "@mui/material";
+import React, { useEffect } from "react";
+import {
+  exportDetailedStudentProgress,
+  exportStudentProgress,
+  useStudentsSummariesFolderUrl,
+} from "../../../../services/students";
+
+import UpdateListButton from "./updateListButton";
+import FolderIcon from "@mui/icons-material/Folder";
+import { useCurrentSemesterDetails } from "../../../../services/configs";
 
 export default function ExportProgressPage() {
-  const [loading, setLoading] = React.useState(false);
-  const [exportUrl, setExportUrl] = React.useState(null);
-  const { getAccessTokenSilently } = useAuth0();
+  const { data: summariesFolderUrl, loading: summariesFolderLoading } =
+    useStudentsSummariesFolderUrl();
 
-  const handleClick = async () => {
-    setLoading(true);
-    setExportUrl(null);
-    const token = await getAccessTokenSilently({
-      // authorizationParams: { scope: "openid profile email offline_access" },
-    });
-    const { spreadsheetId } = await exportStudentProgress(token);
-    console.log("eresult", spreadsheetId);
-    setExportUrl(`https://docs.google.com/spreadsheets/d/${spreadsheetId}`);
-    setLoading(false);
-  };
+  const {
+    data: currentSemesterDetails,
+    loading: currentSemesterDetailsLoading,
+  } = useCurrentSemesterDetails();
+
+  const [selectedYear, setSelectedYear] = React.useState(
+    currentSemesterDetails?.year
+  );
+  const [selectedSemester, setSelectedSemester] = React.useState(
+    currentSemesterDetails?.semester
+  );
+
+  useEffect(() => {
+    setSelectedYear(currentSemesterDetails?.year);
+    setSelectedSemester(currentSemesterDetails?.semester);
+  }, [currentSemesterDetails]);
+
+  if (summariesFolderLoading || currentSemesterDetailsLoading) {
+    return (
+      <Box width="fit-content" mx="auto" mt={10}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (!summariesFolderUrl || !currentSemesterDetails) {
+    return null;
+  }
+
   return (
-    <Stack>
-      <LoadingButton
-        variant="contained"
-        loading={loading}
-        onClick={handleClick}
-      >
-        اضغط لتحديث قائمة إنجاز الطلاب
-      </LoadingButton>
-      {exportUrl && (
-        <Typography variant="body1" sx={{ mt: 3, textAlign: "center" }}>
-          اضغط{" "}
-          <Link href={exportUrl} target="_blank">
-            هنا
-          </Link>{" "}
-          لرؤية القائمة المحدثة
-        </Typography>
-      )}
+    <Stack rowGap={2}>
+      <UpdateListButton
+        buttonText="اضغط لتحديث قائمة الورد للطلاب"
+        submit={exportStudentProgress}
+      />
+
+      <Divider sx={{ mt: 4, mb: 2 }} />
+
+      <Box mb={2}>
+        <Button
+          size="large"
+          startIcon={<FolderIcon />}
+          target="blank"
+          href={summariesFolderUrl}
+        >
+          مجلد القوائم
+        </Button>
+      </Box>
+      <Stack direction="row" spacing={2}>
+        <Box maxWidth={90}>
+          <TextField
+            label="السنة"
+            type="number"
+            variant="outlined"
+            size="small"
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(e.target.value)}
+          />
+        </Box>
+        <Box>
+          <Select
+            value={selectedSemester}
+            size="small"
+            onChange={(e) => setSelectedSemester(e.target.value)}
+          >
+            <MenuItem value={1}>الفصل الأول</MenuItem>
+            <MenuItem value={2}>الفصل الثاني</MenuItem>
+            <MenuItem value={3}>الفصل الصيفي</MenuItem>
+          </Select>
+        </Box>
+        <Box>
+          <UpdateListButton
+            buttonText="اضغط لتحديث قائمة الطلاب المفصلة للفصل المختار"
+            submit={(token) =>
+              exportDetailedStudentProgress(
+                token,
+                selectedYear,
+                selectedSemester
+              )
+            }
+          />
+        </Box>
+      </Stack>
     </Stack>
   );
 }
