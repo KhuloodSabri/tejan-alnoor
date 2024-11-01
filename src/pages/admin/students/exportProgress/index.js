@@ -71,7 +71,7 @@ export default function ExportProgressPage() {
           مجلد القوائم
         </Button>
       </Box>
-      <Stack direction="row" spacing={2}>
+      <Stack direction="row" rowGap={2} flexWrap="wrap" columnGap={2}>
         <Box maxWidth={90}>
           <TextField
             label="السنة"
@@ -95,7 +95,7 @@ export default function ExportProgressPage() {
         </Box>
         <Box>
           <UpdateListButton
-            buttonText="اضغط لتحديث قائمة الطلاب المفصلة للفصل المختار"
+            buttonText="اضغط لتحديث قائمة الجرد للفصل المختار"
             submit={(token) =>
               exportDetailedStudentProgress(
                 token,
