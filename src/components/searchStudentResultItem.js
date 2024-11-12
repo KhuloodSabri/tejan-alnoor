@@ -4,11 +4,14 @@ import { Link as RouterLink } from "react-router-dom";
 import { Link as MuiLink } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import _ from "lodash";
-import { levels } from "../../utils/levels";
+import { levels } from "../utils/levels";
 
-export default function SearchResultItem({ option, ...props }) {
+export default function SearchStudentResultItem({
+  option,
+  optionPath,
+  ...props
+}) {
   const navigate = useNavigate();
-  const optionPath = `/tejan-alnoor/students/${option?.studentID}`;
 
   const handleOptionClick = useCallback(() => {
     const existingList = JSON.parse(

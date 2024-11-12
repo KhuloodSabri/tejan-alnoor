@@ -29,6 +29,8 @@ import AdminPage from "./pages/admin";
 import MenuIcon from "@mui/icons-material/Menu";
 import AuthButton from "./components/authButton";
 import ImportStudents from "./pages/admin/students/importStudents";
+import EditStudentsPage from "./pages/admin/students/editStudents";
+import EditStudentPage from "./pages/admin/students/editStudents/editStudent";
 
 // Create rtl cache
 const cacheRtl = createCache({
@@ -156,6 +158,14 @@ function App() {
                       <Route
                         path="students/importStudents"
                         element={<ImportStudents />}
+                      />
+                      <Route
+                        path="students/editStudents"
+                        element={<EditStudentsPage />}
+                      />
+                      <Route
+                        path="students/editStudents/:studentId"
+                        element={<EditStudentPage />}
                       />
                     </Route>
                   </Routes>

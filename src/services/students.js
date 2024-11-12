@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import { useAuth0 } from "@auth0/auth0-react";
 
@@ -41,7 +41,7 @@ export const useStudents = () => {
   };
 };
 
-export const useStudent = (studentId) => {
+export const useStudentSummary = (studentId) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -187,5 +187,125 @@ export const useStudentsSummariesFolderUrl = () => {
   return {
     data,
     loading,
+  };
+};
+
+export const useStudentsByName = (name) => {
+  const { getAccessTokenSilently } = useAuth0();
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    if (!name) {
+      setData(null);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    const fetchData = async () => {
+      try {
+        const token = await getAccessTokenSilently();
+
+        const url = `${ADMIN_BASE_URL}?name=${encodeURIComponent(name)}`;
+        const response = await axios.get(url, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.status !== 200) {
+          throw new Error("Failed to search students");
+        }
+
+        setData(response.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [getAccessTokenSilently, name]);
+
+  return {
+    data,
+    loading,
+  };
+};
+
+export const useStudentDetails = (studentId) => {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const { getAccessTokenSilently } = useAuth0();
+
+  useEffect(() => {
+    setLoading(true);
+    const fetchData = async () => {
+      const url = `${ADMIN_BASE_URL}/${studentId}`;
+      const token = await getAccessTokenSilently();
+
+      try {
+        const response = await axios.get(url, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setData(response.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [getAccessTokenSilently, studentId]);
+
+  return {
+    data,
+    loading,
+  };
+};
+
+export const useUpdateStudent = () => {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
+  const { getAccessTokenSilently } = useAuth0();
+
+  const updateStudent = useCallback(
+    async (studentId, updates) => {
+      setLoading(true);
+      const token = await getAccessTokenSilently();
+      const url = `${ADMIN_BASE_URL}/${studentId}`;
+      const response = await axios.put(url, updates, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.status !== 200) {
+        setLoading(false);
+        setError(true);
+      }
+
+      setData(response.data);
+      setLoading(false);
+      setError(false);
+    },
+    [getAccessTokenSilently]
+  );
+
+  return {
+    updateStudent,
+    data,
+    loading,
+    error,
   };
 };

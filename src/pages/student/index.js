@@ -12,7 +12,7 @@ import {
 import React from "react";
 import { useParams } from "react-router-dom";
 
-import { useStudent } from "../../services/students";
+import { useStudentSummary } from "../../services/students";
 import RevisitProgressInput from "./revisitProgressInput";
 import SimpleProgressInput from "./simpleProgressInput";
 import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrowLeft";
@@ -24,7 +24,7 @@ import StudentTests from "./studentTests";
 export default function StudenPage() {
   const { studentId } = useParams();
 
-  const { data: student, loading } = useStudent(studentId);
+  const { data: student, loading } = useStudentSummary(studentId);
   const {
     data: currentSemesterDetails,
     loading: currentSemesterDetailsLoading,

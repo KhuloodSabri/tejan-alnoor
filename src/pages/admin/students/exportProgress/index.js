@@ -18,6 +18,7 @@ import {
 import UpdateListButton from "./updateListButton";
 import FolderIcon from "@mui/icons-material/Folder";
 import { useCurrentSemesterDetails } from "../../../../services/configs";
+import SemesterInput from "../../../../components/semesterInput";
 
 export default function ExportProgressPage() {
   const { data: summariesFolderUrl, loading: summariesFolderLoading } =
@@ -72,27 +73,12 @@ export default function ExportProgressPage() {
         </Button>
       </Box>
       <Stack direction="row" rowGap={2} flexWrap="wrap" columnGap={2}>
-        <Box maxWidth={90}>
-          <TextField
-            label="السنة"
-            type="number"
-            variant="outlined"
-            size="small"
-            value={selectedYear}
-            onChange={(e) => setSelectedYear(e.target.value)}
-          />
-        </Box>
-        <Box>
-          <Select
-            value={selectedSemester}
-            size="small"
-            onChange={(e) => setSelectedSemester(e.target.value)}
-          >
-            <MenuItem value={1}>الفصل الأول</MenuItem>
-            <MenuItem value={2}>الفصل الثاني</MenuItem>
-            <MenuItem value={3}>الفصل الصيفي</MenuItem>
-          </Select>
-        </Box>
+        <SemesterInput
+          selectedYear={selectedYear}
+          setSelectedYear={setSelectedYear}
+          selectedSemester={selectedSemester}
+          setSelectedSemester={setSelectedSemester}
+        />
         <Box>
           <UpdateListButton
             buttonText="اضغط لتحديث قائمة الجرد للفصل المختار"

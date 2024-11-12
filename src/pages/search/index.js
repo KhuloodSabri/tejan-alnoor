@@ -14,7 +14,7 @@ import React from "react";
 import _ from "lodash";
 import { useStudents } from "../../services/students";
 import FuzzySearch from "fuzzy-search";
-import SearchResultItem from "./searchResultItem";
+import SearchStudentResultItem from "../../components/searchStudentResultItem";
 import { normalizeString } from "../../utils/string";
 
 export default function SearchPage() {
@@ -68,7 +68,11 @@ export default function SearchPage() {
         filterOptions={filterOptions}
         renderOption={(props, option) => (
           <Box key={props.key}>
-            <SearchResultItem option={option} {..._.omit(props, "key")} />
+            <SearchStudentResultItem
+              option={option}
+              optionPath={`/tejan-alnoor/students/${option.studentID}`}
+              {..._.omit(props, "key")}
+            />
             <Divider />
           </Box>
         )}
@@ -100,14 +104,20 @@ export default function SearchPage() {
             </Stack>
           )}
           <List>
-            {recentSearches.map((id) => (
-              <Box key={id}>
-                <SearchResultItem
-                  option={students.find((student) => student.studentID === id)}
-                  sx={{ px: 2 }}
-                />
-              </Box>
-            ))}
+            {recentSearches.map((id) => {
+              const option = students.find(
+                (student) => student.studentID === id
+              );
+              return (
+                <Box key={id}>
+                  <SearchStudentResultItem
+                    option={option}
+                    optionPath={`/tejan-alnoor/students/${option?.studentID}`}
+                    sx={{ px: 2 }}
+                  />
+                </Box>
+              );
+            })}
           </List>
         </Stack>
       )}

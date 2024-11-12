@@ -1,6 +1,6 @@
 import React from "react";
 import { Outlet, useLocation, Link as RouterLink } from "react-router-dom";
-
+import EditIcon from "@mui/icons-material/Edit";
 import {
   Alert,
   Box,
@@ -25,7 +25,29 @@ import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
 import SyncIcon from "@mui/icons-material/Sync";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import PersonIcon from "@mui/icons-material/Person";
-import AuthButton from "../../components/authButton";
+
+const AdminListItem = ({ description, Icon, path }) => {
+  return (
+    <ListItem>
+      <ListItemButton
+        sx={{
+          backgroundColor: colors.teal[50],
+          color: colors.blue["500"],
+          "&:hover": {
+            backgroundColor: colors.teal[100],
+          },
+        }}
+        component={RouterLink}
+        to={path}
+      >
+        <ListItemIcon sx={{ color: colors.blue["500"] }}>
+          <Icon />
+        </ListItemIcon>
+        <ListItemText primary={description} />
+      </ListItemButton>
+    </ListItem>
+  );
+};
 
 export default function AdminPage() {
   const { user, isAuthenticated, isLoading, loginWithPopup, logout } =
@@ -159,42 +181,21 @@ export default function AdminPage() {
         {isRootPage && (
           <Box maxWidth={300} mx="auto">
             <List>
-              <ListItem>
-                <ListItemButton
-                  sx={{
-                    backgroundColor: colors.teal[50],
-                    color: colors.blue["500"],
-                    "&:hover": {
-                      backgroundColor: colors.teal[100],
-                    },
-                  }}
-                  component={RouterLink}
-                  to="students/exportProgress"
-                >
-                  <ListItemIcon sx={{ color: colors.blue["500"] }}>
-                    <SyncIcon />
-                  </ListItemIcon>
-                  <ListItemText primary="تحديث قوائم إنجاز الطلاب" />
-                </ListItemButton>
-              </ListItem>
-              <ListItem>
-                <ListItemButton
-                  sx={{
-                    backgroundColor: colors.teal[50],
-                    color: colors.blue["500"],
-                    "&:hover": {
-                      backgroundColor: colors.teal[100],
-                    },
-                  }}
-                  component={RouterLink}
-                  to="students/importStudents"
-                >
-                  <ListItemIcon sx={{ color: colors.blue["500"] }}>
-                    <PlaylistAddIcon />
-                  </ListItemIcon>
-                  <ListItemText primary="إضافة قائمة من الطلاب" />
-                </ListItemButton>
-              </ListItem>
+              <AdminListItem
+                description="تحديث قوائم إنجاز الطلاب"
+                Icon={SyncIcon}
+                path="students/exportProgress"
+              />
+              <AdminListItem
+                description="إضافة قائمة من الطلاب"
+                Icon={PlaylistAddIcon}
+                path="students/importStudents"
+              />
+              <AdminListItem
+                description="تعديل بيانات الطلاب"
+                Icon={EditIcon}
+                path="students/editStudents"
+              />
             </List>
           </Box>
         )}
