@@ -3,6 +3,7 @@ import { useFormik } from "formik";
 import {
   Alert,
   Box,
+  CircularProgress,
   Dialog,
   Divider,
   MenuItem,
@@ -19,8 +20,14 @@ import * as Yup from "yup";
 import _ from "lodash";
 import { useUpdateStudent } from "../../../../../services/students";
 import LoadingButton from "@mui/lab/LoadingButton";
+import { useCurrentSemesterDetails } from "../../../../../services/configs";
 
 const statuses = ["منتظم/ة", "منسحب/ة", "جمد/ت الفصل", "مفصول/ة"];
+const semestersListToStatusMap = {
+  withdrawnSemesters: "منسحب/ة",
+  frozenSemesters: "جمد/ت الفصل",
+  dismissedSemesters: "مفصول/ة",
+};
 
 const validationSchema = Yup.object().shape({
   studentName: Yup.string()
@@ -42,12 +49,10 @@ const validationSchema = Yup.object().shape({
     })
     .required("يجب اختيار مشرفـ/ـة"),
 
-  phoneNumber: Yup.string()
-    .matches(
-      /^\d{10}(\d{2})?(\d{2})?$/,
-      "رقم الهاتف يجب أن يتكون من 10 أرقام أو 12 أو 14 رقمًًا مع الكود الدولي "
-    )
-    .required("يجب إدخال رقم الهاتف"),
+  phoneNumber: Yup.string().matches(
+    /^\d{10}(\d{2})?(\d{2})?$/,
+    "رقم الهاتف يجب أن يتكون من 10 أرقام أو 12 أو 14 رقمًًا مع الكود الدولي "
+  ),
 
   levelID: Yup.string()
     .required("يجب اختيار المستوى")
@@ -121,6 +126,10 @@ const validationSchema = Yup.object().shape({
 export default function StudentForm({ student }) {
   const { loading, error, updateStudent } = useUpdateStudent();
   const [resultDialogOpen, setResultDialogOpen] = React.useState(false);
+  const {
+    data: currentSemesterDetails,
+    loading: currentSemesterDetailsLoading,
+  } = useCurrentSemesterDetails();
 
   const formik = useFormik({
     initialValues: {
@@ -156,6 +165,54 @@ export default function StudentForm({ student }) {
     }
   }, [formik.values.joinSemester, setFieldValue]);
 
+  useEffect(() => {
+    if (currentSemesterDetailsLoading || !currentSemesterDetails) return;
+
+    for (const [semestersList, status] of Object.entries(
+      semestersListToStatusMap
+    )) {
+      const currentSemesterInList = formik.values[semestersList]?.some(
+        (semester) =>
+          semester.year === currentSemesterDetails?.year &&
+          semester.semester === currentSemesterDetails?.semester
+      );
+
+      if (formik.values.status !== status && currentSemesterInList) {
+        setFieldValue(
+          semestersList,
+          formik.values[semestersList].filter(
+            (semester) =>
+              semester.year !== currentSemesterDetails?.year ||
+              semester.semester !== currentSemesterDetails?.semester
+          )
+        );
+      } else if (formik.values.status === status && !currentSemesterInList) {
+        setFieldValue(semestersList, [
+          ...formik.values[semestersList],
+          {
+            year: currentSemesterDetails?.year,
+            semester: currentSemesterDetails?.semester,
+          },
+        ]);
+      }
+    }
+  }, [
+    currentSemesterDetails,
+    currentSemesterDetails?.semester,
+    currentSemesterDetails?.year,
+    currentSemesterDetailsLoading,
+    formik.values,
+    setFieldValue,
+  ]);
+
+  if (currentSemesterDetailsLoading) {
+    return (
+      <Box mx="auto" width="fit-content" mt={10}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
     <Stack rowGap={3} maxWidth={300} mx="auto" mt={2}>
       <TextField
@@ -182,7 +239,7 @@ export default function StudentForm({ student }) {
         <TextField
           label="رقم الواتس"
           size="small"
-          value={formik.values.phoneNumber}
+          value={formik.values.phoneNumber ?? ""}
           onChange={(event) =>
             formik.setFieldValue("phoneNumber", event.target.value)
           }
