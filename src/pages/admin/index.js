@@ -72,9 +72,9 @@ export default function AdminPage() {
     setLogoutPopperOpen((prev) => !prev);
   };
 
-  console.log("user", user);
-  console.log("isAuthenticated", isAuthenticated);
-  console.log("isLoading", isLoading);
+  const parts = location.pathname.split("/");
+  if (parts.length > 2) parts.pop();
+  const prevPath = parts.join("/");
 
   if (isLoading || !isAuthenticated) {
     return (
@@ -128,7 +128,7 @@ export default function AdminPage() {
             <Box>
               <IconButton
                 component={RouterLink}
-                to={`/tejan-alnoor/admin`}
+                to={prevPath}
                 size="small"
                 sx={{
                   color: "white",
@@ -184,17 +184,17 @@ export default function AdminPage() {
               <AdminListItem
                 description="تحديث قوائم إنجاز الطلاب"
                 Icon={SyncIcon}
-                path="students/exportProgress"
+                path="exportProgress"
               />
               <AdminListItem
                 description="إضافة قائمة من الطلاب"
                 Icon={PlaylistAddIcon}
-                path="students/importStudents"
+                path="importStudents"
               />
               <AdminListItem
                 description="تعديل بيانات الطلاب"
                 Icon={EditIcon}
-                path="students/editStudents"
+                path="editStudents"
               />
             </List>
           </Box>

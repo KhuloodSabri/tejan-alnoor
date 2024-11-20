@@ -49,7 +49,7 @@ export default function EditStudentsPage() {
               <Box key={student.studentID}>
                 <SearchStudentResultItem
                   option={student}
-                  optionPath={`/tejan-alnoor/admin/students/editStudents/${student?.studentID}`}
+                  optionPath={`/tejan-alnoor/admin/editStudents/${student?.studentID}`}
                   sx={{ px: 2 }}
                 />
                 <Divider />

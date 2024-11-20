@@ -152,19 +152,19 @@ function App() {
 
                     <Route path="/tejan-alnoor/admin" element={<AdminPage />}>
                       <Route
-                        path="students/exportProgress"
+                        path="exportProgress"
                         element={<ExportProgressPage />}
                       />
                       <Route
-                        path="students/importStudents"
+                        path="importStudents"
                         element={<ImportStudents />}
                       />
                       <Route
-                        path="students/editStudents"
+                        path="editStudents"
                         element={<EditStudentsPage />}
                       />
                       <Route
-                        path="students/editStudents/:studentId"
+                        path="editStudents/:studentId"
                         element={<EditStudentPage />}
                       />
                     </Route>
