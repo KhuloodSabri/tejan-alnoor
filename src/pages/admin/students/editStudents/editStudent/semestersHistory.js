@@ -20,6 +20,8 @@ export default function SemestersHistory({
   targetSemesters,
   title,
   noHistoryMsg,
+  onChange,
+  semestersWithAnotherStatus,
 }) {
   const [addSemesterDialogOpen, setAddSemesterDialogOpen] =
     React.useState(false);
@@ -53,6 +55,7 @@ export default function SemestersHistory({
                       );
 
                       formik.setFieldValue(targetSemesters, newSemesters);
+                      onChange?.(targetSemesters, newSemesters);
                     }}
                   >
                     <DeleteIcon sx={{ fontSize: 17 }} />
@@ -82,20 +85,34 @@ export default function SemestersHistory({
       <AddSemesterDialog
         open={addSemesterDialogOpen}
         onClose={() => setAddSemesterDialogOpen(false)}
-        onAdd={(semester) => {
+        onAdd={(semester, setErrorMessage) => {
+          if (
+            semestersWithAnotherStatus?.find(
+              (s) =>
+                s.year === semester.year && s.semester === semester.semester
+            )
+          ) {
+            setErrorMessage?.(
+              "لا يمكن إضافة فصل له حالة مختلفة - الرجاء إزالة الفصل من القائمة الأخرى أولا"
+            );
+            return;
+          }
+
+          setErrorMessage?.(null);
           const exists = formik.values[targetSemesters].find(
             (s) => s.year === semester.year && s.semester === semester.semester
           );
 
           if (!exists) {
-            formik.setFieldValue(
-              targetSemesters,
-              _.orderBy(
-                [...formik.values[targetSemesters], semester],
-                ["year", "semester"],
-                ["asc", "asc"]
-              )
+            const newSemesters = _.orderBy(
+              [...formik.values[targetSemesters], semester],
+              ["year", "semester"],
+              ["asc", "asc"]
             );
+
+            formik.setFieldValue(targetSemesters, newSemesters);
+
+            onChange?.(targetSemesters, newSemesters);
           }
 
           setAddSemesterDialogOpen(false);

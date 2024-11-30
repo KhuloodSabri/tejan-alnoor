@@ -72,9 +72,9 @@ export default function AdminPage() {
     setLogoutPopperOpen((prev) => !prev);
   };
 
-  const parts = location.pathname.split("/");
-  if (parts.length > 2) parts.pop();
-  const prevPath = parts.join("/");
+  const pathParts = location.pathname.split("/");
+  if (pathParts.length > 2) pathParts.pop();
+  const prevPath = pathParts.join("/");
 
   if (isLoading || !isAuthenticated) {
     return (

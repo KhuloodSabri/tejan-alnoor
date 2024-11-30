@@ -10,7 +10,7 @@ const BASE_URL =
 const ADMIN_BASE_URL =
   window.location.hostname === "localhost"
     ? "http://localhost:3033/admin/supervisors"
-    : "https://dtoo4lhm5ojwgql5xfxpmo6nru0alhkp.lambda-url.eu-north-1.on.aws/students";
+    : "https://dtoo4lhm5ojwgql5xfxpmo6nru0alhkp.lambda-url.eu-north-1.on.aws/supervisors";
 
 export const useSupervisorsByName = (name) => {
   const { getAccessTokenSilently } = useAuth0();

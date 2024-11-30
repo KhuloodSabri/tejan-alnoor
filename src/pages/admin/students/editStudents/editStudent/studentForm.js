@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import { useFormik } from "formik";
 import {
   Alert,
@@ -165,45 +165,71 @@ export default function StudentForm({ student }) {
     }
   }, [formik.values.joinSemester, setFieldValue]);
 
-  useEffect(() => {
-    if (currentSemesterDetailsLoading || !currentSemesterDetails) return;
+  const onStatusChange = useCallback(
+    (newStatus) => {
+      if (currentSemesterDetailsLoading || !currentSemesterDetails) return;
 
-    for (const [semestersList, status] of Object.entries(
-      semestersListToStatusMap
-    )) {
-      const currentSemesterInList = formik.values[semestersList]?.some(
+      for (const [semestersList, status] of Object.entries(
+        semestersListToStatusMap
+      )) {
+        const currentSemesterInList = formik.values[semestersList]?.some(
+          (semester) =>
+            semester.year === currentSemesterDetails?.year &&
+            semester.semester === currentSemesterDetails?.semester
+        );
+
+        if (newStatus !== status && currentSemesterInList) {
+          setFieldValue(
+            semestersList,
+            formik.values[semestersList].filter(
+              (semester) =>
+                semester.year !== currentSemesterDetails?.year ||
+                semester.semester !== currentSemesterDetails?.semester
+            )
+          );
+        } else if (newStatus === status && !currentSemesterInList) {
+          setFieldValue(semestersList, [
+            ...formik.values[semestersList],
+            {
+              year: currentSemesterDetails?.year,
+              semester: currentSemesterDetails?.semester,
+            },
+          ]);
+        }
+      }
+    },
+    [
+      currentSemesterDetails,
+      currentSemesterDetailsLoading,
+      formik.values,
+      setFieldValue,
+    ]
+  );
+
+  const onSemestersListChange = useCallback(
+    (targetSemestersList, newValue) => {
+      if (currentSemesterDetailsLoading || !currentSemesterDetails) return;
+
+      const currentSemesterInList = newValue?.some(
         (semester) =>
           semester.year === currentSemesterDetails?.year &&
           semester.semester === currentSemesterDetails?.semester
       );
 
-      if (formik.values.status !== status && currentSemesterInList) {
-        setFieldValue(
-          semestersList,
-          formik.values[semestersList].filter(
-            (semester) =>
-              semester.year !== currentSemesterDetails?.year ||
-              semester.semester !== currentSemesterDetails?.semester
-          )
-        );
-      } else if (formik.values.status === status && !currentSemesterInList) {
-        setFieldValue(semestersList, [
-          ...formik.values[semestersList],
-          {
-            year: currentSemesterDetails?.year,
-            semester: currentSemesterDetails?.semester,
-          },
-        ]);
+      if (
+        currentSemesterInList &&
+        formik.values.status !== semestersListToStatusMap[targetSemestersList]
+      ) {
+        setFieldValue("status", semestersListToStatusMap[targetSemestersList]);
       }
-    }
-  }, [
-    currentSemesterDetails,
-    currentSemesterDetails?.semester,
-    currentSemesterDetails?.year,
-    currentSemesterDetailsLoading,
-    formik.values,
-    setFieldValue,
-  ]);
+    },
+    [
+      currentSemesterDetails,
+      currentSemesterDetailsLoading,
+      formik.values.status,
+      setFieldValue,
+    ]
+  );
 
   if (currentSemesterDetailsLoading) {
     return (
@@ -307,9 +333,10 @@ export default function StudentForm({ student }) {
           label="الحالة"
           size="small"
           value={formik.values.status}
-          onChange={(event) =>
-            formik.setFieldValue("status", event.target.value)
-          }
+          onChange={(event) => {
+            formik.setFieldValue("status", event.target.value);
+            onStatusChange(event.target.value);
+          }}
         >
           {statuses.map((status, index) => (
             <MenuItem key={index} value={status}>
@@ -333,6 +360,11 @@ export default function StudentForm({ student }) {
         noHistoryMsg={"لم ينسحب الطالب سابقا"}
         formik={formik}
         targetSemesters="withdrawnSemesters"
+        onChange={onSemestersListChange}
+        semestersWithAnotherStatus={[
+          ...formik.values.frozenSemesters,
+          ...formik.values.dismissedSemesters,
+        ]}
       />
       <Divider />
       <SemestersHistory
@@ -340,6 +372,11 @@ export default function StudentForm({ student }) {
         noHistoryMsg={"لم يجمد الطالب أي فصل"}
         formik={formik}
         targetSemesters="frozenSemesters"
+        onChange={onSemestersListChange}
+        semestersWithAnotherStatus={[
+          ...formik.values.withdrawnSemesters,
+          ...formik.values.dismissedSemesters,
+        ]}
       />
       <Divider />
       <SemestersHistory
@@ -347,6 +384,11 @@ export default function StudentForm({ student }) {
         noHistoryMsg={"لم يتم فصل الطالب سابقا"}
         formik={formik}
         targetSemesters="dismissedSemesters"
+        onChange={onSemestersListChange}
+        semestersWithAnotherStatus={[
+          ...formik.values.withdrawnSemesters,
+          ...formik.values.frozenSemesters,
+        ]}
       />
       {formik.submitCount > 0 && !_.isEmpty(formik.errors) && (
         <Stack rowGap={0.5}>
