@@ -48,6 +48,7 @@ export default function SimpleProgressInput({
   student,
   progressKey,
   description,
+  postfixDescription,
 }) {
   const [editing, setEditing] = useState(false);
   const prefix = getPositiveProgressPrefix(student);
@@ -119,15 +120,31 @@ export default function SimpleProgressInput({
             : "...."
           : ""}
       </Typography>
+      {editing && (
+        <TextField
+          dir="rtl"
+          value={value}
+          size="small"
+          variant="outlined"
+          sx={{
+            width: 80,
+            fieldset: { borderColor: validationError ? "red" : undefined },
+          }}
+          onChange={handleChange}
+        />
+      )}
+
+      <Typography variant="h6" color={colors.teal["700"]}>
+        {postfixDescription}
+      </Typography>
+
       {!editing && (
         <Box ml="auto">
           <Button
             size="small"
-            // variant="outlined"
             onClick={() => setEditing(true)}
             startIcon={<EditIcon />}
             sx={{
-              //   boxShadow: "none",
               fontWeight: 600,
               paddingTop: 0.1,
               paddingBottom: 0.1,
@@ -139,30 +156,14 @@ export default function SimpleProgressInput({
       )}
       {editing && (
         <Box ml={"auto"}>
-          <TextField
-            dir="rtl"
-            value={value}
-            size="small"
-            variant="outlined"
-            sx={{
-              width: 80,
-              fieldset: { borderColor: validationError ? "red" : undefined },
-            }}
-            onChange={handleChange}
-          />
-
           <LoadingButton
             size="small"
-            // variant="outlined"
             onClick={handleSave}
             endIcon={<SaveIcon />}
             loading={saveStatus.loading}
             disabled={saveStatus.loading}
             sx={{
-              //   boxShadow: "none",
               fontWeight: 600,
-              //   paddingTop: 0.1,
-              //   paddingBottom: 0.1,
             }}
           >
             حفظ

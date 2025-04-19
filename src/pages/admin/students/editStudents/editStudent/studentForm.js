@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback } from "react";
 import { useFormik } from "formik";
 import {
   Alert,
@@ -13,14 +13,17 @@ import {
   Typography,
 } from "@mui/material";
 import SupervisorsSearch from "./supervisorsSearch";
-import { levels } from "../../../../../utils/levels";
 import SemesterInput from "../../../../../components/semesterInput";
-import SemestersHistory from "./semestersHistory";
+import SemestersStatusHistory from "./semestersStatusHistory";
 import * as Yup from "yup";
 import _ from "lodash";
 import { useUpdateStudent } from "../../../../../services/students";
 import LoadingButton from "@mui/lab/LoadingButton";
 import { useCurrentSemesterDetails } from "../../../../../services/configs";
+import { useLevels } from "../../../../../services/levels";
+import ChangeLevelDialog from "./changeLevelDialog";
+import LevelHistory from "./levelHistory";
+import { compareSemesters } from "../../../../../utils/semesters";
 
 const statuses = ["منتظم/ة", "منسحب/ة", "جمد/ت الفصل", "مفصول/ة"];
 const semestersListToStatusMap = {
@@ -126,10 +129,14 @@ const validationSchema = Yup.object().shape({
 export default function StudentForm({ student }) {
   const { loading, error, updateStudent } = useUpdateStudent();
   const [resultDialogOpen, setResultDialogOpen] = React.useState(false);
+  // this is not confirmed value
+  const [newLevelID, setNewLevelID] = React.useState(undefined);
   const {
     data: currentSemesterDetails,
     loading: currentSemesterDetailsLoading,
   } = useCurrentSemesterDetails();
+
+  const { data: levels } = useLevels();
 
   const formik = useFormik({
     initialValues: {
@@ -149,6 +156,7 @@ export default function StudentForm({ student }) {
       withdrawnSemesters: student.withdrawnSemesters,
       frozenSemesters: student.frozenSemesters,
       dismissedSemesters: student.dismissedSemesters,
+      levelChanges: student.levelChanges,
     },
     validationSchema: validationSchema,
     onSubmit: async (values) => {
@@ -159,11 +167,10 @@ export default function StudentForm({ student }) {
 
   const { setFieldValue } = formik;
 
-  useEffect(() => {
-    if (formik.values.joinSemester === 3) {
-      setFieldValue("joinMonth", 1);
-    }
-  }, [formik.values.joinSemester, setFieldValue]);
+  const setJoinMonth = useCallback(
+    (newValue) => setFieldValue("joinMonth", newValue),
+    [setFieldValue]
+  );
 
   const onStatusChange = useCallback(
     (newStatus) => {
@@ -231,6 +238,134 @@ export default function StudentForm({ student }) {
     ]
   );
 
+  const shouldAddLevelChange = useCallback(
+    (year, semester, month) => {
+      if (
+        formik.values.joinYear === year &&
+        formik.values.joinSemester === semester &&
+        formik.values.joinMonth === month
+      ) {
+        console.log("should not add level change");
+        return false;
+      }
+
+      console.log("should add level change");
+      return true;
+    },
+    [
+      formik.values.joinMonth,
+      formik.values.joinSemester,
+      formik.values.joinYear,
+    ]
+  );
+
+  const shouldUpdateCurrentStudentLevel = useCallback(
+    (year, semester, month) => {
+      const semesterObj = {
+        year,
+        semester,
+        month,
+      };
+      // changed after the current change and the change already took effect
+      const changedAfter = formik.values.levelChanges?.some((change) => {
+        return (
+          compareSemesters(change?.semester, semesterObj) > 0 &&
+          compareSemesters(change?.semester, currentSemesterDetails) <= 0
+        );
+      });
+
+      return (
+        !changedAfter &&
+        compareSemesters(semesterObj, currentSemesterDetails) <= 0
+      );
+    },
+    [currentSemesterDetails, formik.values.levelChanges]
+  );
+
+  const onLevelChangeConfirm = useCallback(
+    (levelID, year, semester, month) => {
+      setNewLevelID(undefined);
+      const newLevelChange = {
+        fromLevelID: formik.values.levelID,
+        toLevelID: levelID,
+        semester: {
+          year,
+          semester,
+          month,
+        },
+      };
+
+      const newLevelChanges = _.orderBy(
+        [...(formik.values.levelChanges ?? []), newLevelChange],
+        ["semester.year", "semester.semester", "semester.month"],
+        ["asc", "asc", "asc"]
+      );
+
+      if (
+        !shouldAddLevelChange(year, semester, month) ||
+        shouldUpdateCurrentStudentLevel(year, semester, month)
+      ) {
+        setFieldValue("levelID", levelID);
+      }
+
+      if (shouldAddLevelChange(year, semester, month)) {
+        setFieldValue("levelChanges", newLevelChanges);
+      }
+    },
+    [
+      formik.values.levelChanges,
+      formik.values.levelID,
+      setFieldValue,
+      shouldAddLevelChange,
+      shouldUpdateCurrentStudentLevel,
+    ]
+  );
+
+  const onLevelChangeDelete = useCallback(
+    (year, semester, month) => {
+      if (!formik.values.levelChanges?.length) {
+        return;
+      }
+
+      const deletedChangeIndex = formik.values.levelChanges.findIndex(
+        (change) => {
+          return (
+            change.semester.year === year &&
+            change.semester.semester === semester &&
+            change.semester.month === month
+          );
+        }
+      );
+
+      let deletedChange = undefined;
+      let newLevelChanges = [...formik.values.levelChanges];
+
+      if (deletedChangeIndex !== -1) {
+        deletedChange = formik.values.levelChanges[deletedChangeIndex];
+
+        if (deletedChangeIndex < formik.values.levelChanges.length - 1) {
+          newLevelChanges[deletedChangeIndex + 1].fromLevelID =
+            deletedChange.fromLevelID;
+        }
+
+        newLevelChanges = formik.values.levelChanges.filter((change) => {
+          return (
+            change.semester.year !== year ||
+            change.semester.semester !== semester ||
+            change.semester.month !== month
+          );
+        });
+
+        if (shouldUpdateCurrentStudentLevel(year, semester, month)) {
+          setFieldValue("levelID", deletedChange.fromLevelID);
+        }
+
+        setFieldValue("levelChanges", newLevelChanges);
+      }
+    },
+    [formik.values.levelChanges, setFieldValue, shouldUpdateCurrentStudentLevel]
+  );
+
   if (currentSemesterDetailsLoading) {
     return (
       <Box mx="auto" width="fit-content" mt={10}>
@@ -240,7 +375,7 @@ export default function StudentForm({ student }) {
   }
 
   return (
-    <Stack rowGap={3} maxWidth={300} mx="auto" mt={2}>
+    <Stack rowGap={3} maxWidth={400} mx="auto" mt={2}>
       <TextField
         label="اسم الطالبـ/ـة"
         size="small"
@@ -249,7 +384,7 @@ export default function StudentForm({ student }) {
           formik.setFieldValue("studentName", event.target.value)
         }
       />
-      <Stack direction="row" columnGap={2}>
+      <Stack direction="row" columnGap={1}>
         <Select
           label="الجنس"
           size="small"
@@ -268,6 +403,16 @@ export default function StudentForm({ student }) {
           value={formik.values.phoneNumber ?? ""}
           onChange={(event) =>
             formik.setFieldValue("phoneNumber", event.target.value)
+          }
+        />
+        <TextField
+          label="رقم الدفعة"
+          size="small"
+          sx={{ maxWidth: 70 }}
+          value={formik.values.groupNumber}
+          type="number"
+          onChange={(event) =>
+            formik.setFieldValue("groupNumber", event.target.value)
           }
         />
       </Stack>
@@ -293,70 +438,72 @@ export default function StudentForm({ student }) {
             setSelectedSemester={(value) =>
               formik.setFieldValue("joinSemester", value)
             }
+            selectedMonth={formik.values.joinMonth}
+            setSelectedMonth={setJoinMonth}
           />
-          <Select
-            label="الشهر"
-            size="small"
-            value={formik.values.joinMonth}
-            onChange={(event) =>
-              formik.setFieldValue("joinMonth", event.target.value)
-            }
-          >
-            <MenuItem value={1}>شهر 1</MenuItem>
-            {formik.values.joinSemester < 3 && (
-              <MenuItem value={2}>شهر 2</MenuItem>
-            )}
-            {formik.values.joinSemester < 3 && (
-              <MenuItem value={3}>شهر 3</MenuItem>
-            )}
-          </Select>
         </Stack>
       </Stack>
-      <Stack direction="row" columnGap={2}>
-        <Select
-          label="المستوى"
-          size="small"
-          value={formik.values.levelID}
-          onChange={(event) =>
-            formik.setFieldValue("levelID", event.target.value)
-          }
-          sx={{ maxWidth: 100 }}
-          disabled={true}
-        >
-          {levels.map((levelName, index) => (
-            <MenuItem value={index} key={index}>
-              {levelName}
-            </MenuItem>
-          ))}
-        </Select>
-        <Select
-          label="الحالة"
-          size="small"
-          value={formik.values.status}
-          onChange={(event) => {
-            formik.setFieldValue("status", event.target.value);
-            onStatusChange(event.target.value);
-          }}
-        >
-          {statuses.map((status, index) => (
-            <MenuItem key={index} value={status}>
-              {status}
-            </MenuItem>
-          ))}
-        </Select>
-        <TextField
-          label="رقم الدفعة"
-          size="small"
-          value={formik.values.groupNumber}
-          type="number"
-          onChange={(event) =>
-            formik.setFieldValue("groupNumber", event.target.value)
-          }
-        />
-      </Stack>
+
+      {!!currentSemesterDetails && !!levels.length && (
+        <Stack rowGap={0.5}>
+          <Typography variant="body2">
+            مستوى و حالة الطالب في الوقت الحالي
+          </Typography>
+
+          <Typography variant="caption">
+            أي سنة {currentSemesterDetails.year} - فصل{" "}
+            {currentSemesterDetails.semester} - شهر{" "}
+            {currentSemesterDetails.month}
+          </Typography>
+
+          <Stack direction="row" columnGap={2}>
+            <Select
+              label="المستوى"
+              size="small"
+              value={formik.values.levelID}
+              onChange={(event) => {
+                setNewLevelID(event.target.value);
+              }}
+              sx={{ maxWidth: 150 }}
+            >
+              {levels.map((level) => (
+                <MenuItem value={level.levelID} key={level.levelID}>
+                  {level.levelName}
+                </MenuItem>
+              ))}
+            </Select>
+            <Select
+              label="الحالة"
+              size="small"
+              value={formik.values.status}
+              onChange={(event) => {
+                formik.setFieldValue("status", event.target.value);
+                onStatusChange(event.target.value);
+              }}
+            >
+              {statuses.map((status, index) => (
+                <MenuItem key={index} value={status}>
+                  {status}
+                </MenuItem>
+              ))}
+            </Select>
+          </Stack>
+        </Stack>
+      )}
       <Divider />
-      <SemestersHistory
-        title={"الفصول التي انسحب فيها الطالب"}
+      {!_.isEmpty(currentSemesterDetails) && !_.isEmpty(levels) && (
+        <LevelHistory
+          onAddConfirm={onLevelChangeConfirm}
+          onDeleteConfirm={onLevelChangeDelete}
+          currentSemesterDetails={currentSemesterDetails}
+          levels={levels}
+          student={student}
+          formik={formik}
+        />
+      )}
+      <Divider />
+      <SemestersStatusHistory
+        title={"الفصول التي انسحب/سينسحب فيها الطالب"}
         noHistoryMsg={"لم ينسحب الطالب سابقا"}
         formik={formik}
         targetSemesters="withdrawnSemesters"
@@ -367,8 +514,8 @@ export default function StudentForm({ student }) {
         ]}
       />
       <Divider />
-      <SemestersHistory
-        title={"الفصول التي جمدها الطالب"}
+      <SemestersStatusHistory
+        title={"الفصول التي جمدها/سيجمدها الطالب"}
         noHistoryMsg={"لم يجمد الطالب أي فصل"}
         formik={formik}
         targetSemesters="frozenSemesters"
@@ -379,7 +526,7 @@ export default function StudentForm({ student }) {
         ]}
       />
       <Divider />
-      <SemestersHistory
+      <SemestersStatusHistory
         title={"الفصول التي فُصل فيها الطالب"}
         noHistoryMsg={"لم يتم فصل الطالب سابقا"}
         formik={formik}
@@ -390,6 +537,7 @@ export default function StudentForm({ student }) {
           ...formik.values.frozenSemesters,
         ]}
       />
+
       {formik.submitCount > 0 && !_.isEmpty(formik.errors) && (
         <Stack rowGap={0.5}>
           <Divider />
@@ -422,6 +570,18 @@ export default function StudentForm({ student }) {
           </Alert>
         </Box>
       </Dialog>
+      {!!levels.length && (
+        <ChangeLevelDialog
+          open={newLevelID !== undefined && newLevelID !== student.levelID}
+          onClose={() => setNewLevelID(undefined)}
+          onConfirm={onLevelChangeConfirm}
+          levels={levels}
+          student={student}
+          formik={formik}
+          defaultNewLevelId={newLevelID ?? 0}
+          currentSemesterDetails={currentSemesterDetails}
+        />
+      )}
     </Stack>
   );
 }

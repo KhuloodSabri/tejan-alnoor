@@ -20,6 +20,8 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { Link as RouterLink } from "react-router-dom";
 import { useCurrentSemesterDetails } from "../../services/configs";
 import StudentTests from "./studentTests";
+import PastMemProgress from "./pastMemProgress";
+import { getLevelMemorizingDirection } from "../../utils/levels";
 
 export default function StudenPage() {
   const { studentId } = useParams();
@@ -108,8 +110,18 @@ export default function StudenPage() {
       <SimpleProgressInput
         student={student}
         progressKey="memorizingProgress"
-        description="التسميع حتى صفحة "
+        description={
+          getLevelMemorizingDirection(student.levelID) === "asc"
+            ? "الحفظ حتى صفحة "
+            : " حفظ"
+        }
+        postfixDescription={
+          getLevelMemorizingDirection(student.levelID) === "asc" ? "" : " صفحة"
+        }
       />
+
+      <PastMemProgress student={student} />
+
       <RevisitProgressInput
         student={student}
         currentSemesterDetails={currentSemesterDetails}

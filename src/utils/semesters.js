@@ -66,3 +66,40 @@ export function getSemesterName(semester) {
 
   return `الفصل الصيفي  ${semester.year}`;
 }
+
+export const compareSemesters = (semester1, semester2) => {
+  if (semester1.year < semester2.year) {
+    return -1;
+  }
+
+  if (semester1.year > semester2.year) {
+    return 1;
+  }
+
+  if (semester1.semester < semester2.semester) {
+    return -1;
+  }
+
+  if (semester1.semester > semester2.semester) {
+    return 1;
+  }
+
+  if (semester1.month < semester2.month) {
+    return -1;
+  }
+
+  if (semester1.month > semester2.month) {
+    return 1;
+  }
+
+  return 0;
+};
+
+export const getSemestersMonthsDiff = (semester1, semester2) => {
+  let diff = (semester2.year - semester1.year) * 7;
+  diff += (semester2.semester - 1) * 3;
+  diff -= (semester1.semester - 1) * 3;
+  diff += semester2.month;
+  diff -= semester1.month;
+  return diff;
+};

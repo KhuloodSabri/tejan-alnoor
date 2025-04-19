@@ -23,7 +23,7 @@ export default function EditStudentPage() {
   }
 
   return (
-    <Stack rowGap={2} maxWidth={300} mx="auto">
+    <Stack rowGap={2} maxWidth={400} mx="auto">
       <Stack direction="row" columnGap={4}>
         <Button
           size="small"
