@@ -12,6 +12,8 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import PageInput from "./pageInput";
 
+// TODO:: add subbar for each month and indicate level changes
+// ordering in amma level (order by juz desc then surah asc, subbar for each juz)
 export default function RevisitProgressDialog({
   student,
   mode,
