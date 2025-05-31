@@ -3,17 +3,17 @@ import {
   Button,
   CircularProgress,
   colors,
+  Divider,
   Stack,
   Typography,
 } from "@mui/material";
-import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrowLeft";
+
 import React from "react";
 
 import { getSemesterMonthsCount } from "../../utils/semesters";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 
-import { getPositiveProgressPrefix } from "./utils";
 import RevisitProgressDialog from "./revisitProgressDialog";
 
 import SemesterNavigator from "./semesterNavigator";
@@ -34,8 +34,6 @@ export default function RevisitProgressInput({
     currentSemesterDetails
   );
 
-  const progressPrefix = getPositiveProgressPrefix(student);
-
   const monthsCount = getSemesterMonthsCount(visibleSemester);
 
   const { data: levels, levelsLoading } = useLevels();
@@ -48,103 +46,114 @@ export default function RevisitProgressInput({
     );
   }
 
-  console.log("in parent levels", levels);
-
   return (
-    <Stack rowGap={1} mb={2}>
-      <Box>
-        <Typography variant="h6" color={colors.teal["700"]}>
-          <Typography
-            component="span"
-            fontWeight={600}
-            variant="h6"
-            color={colors.teal["700"]}
-          >
-            <KeyboardDoubleArrowLeftIcon
-              sx={{ verticalAlign: "text-bottom" }}
-            />
-          </Typography>
-          {progressPrefix} المراجعة كما هو موضح في الشكل أدناه
-        </Typography>
+    <Stack rowGap={1} my={3}>
+      <Stack border={`1px solid ${colors.teal["A700"]}`} borderRadius={3}>
         <Typography
-          variant="subtitle2"
+          fontWeight={500}
+          variant="h5"
           color={colors.teal["700"]}
-          sx={{ my: 0.8 }}
+          textAlign="center"
+          sx={{
+            bgcolor: colors.grey[200],
+            py: 1,
+            borderRadius: "12px 12px 0 0",
+          }}
         >
-          *اضغط على المساحات الخضراء للمزيد من التفاصيل
+          المراجعة
         </Typography>
-      </Box>
-      <Stack direction="row" columnGap={2} pl={3}>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          sx={{ boxShadow: "none" }}
-          size="small"
-          onClick={() => {
-            setDialogMode("add");
-            setDialogOpen(true);
-          }}
-        >
-          مراجعة جديدة
-        </Button>
-        <Button
-          variant="outlined"
-          startIcon={<RemoveIcon />}
-          sx={{ boxShadow: "none" }}
-          size="small"
-          onClick={() => {
-            setDialogMode("remove");
-            setDialogOpen(true);
-          }}
-        >
-          إزالة مراجعة{" "}
-        </Button>
-      </Stack>
-      <Stack mt={1}>
-        <SemesterNavigator
-          student={student}
-          currentSemesterDetails={currentSemesterDetails}
-          selectedSemester={visibleSemester}
-          setSelectedSemester={setVisibleSemester}
-        />
-        <Stack
-          direction="row"
-          mt={2}
-          width={"100%"}
-          alignItems={"center"}
-          px={1.5}
-          boxSizing={"border-box"}
-        >
-          {Array.from({ length: monthsCount }, (_, i) => i + 1).map((month) => (
-            <Box
-              width={`${100 / monthsCount}%`}
-              key={month}
-              px={0.5}
-              boxSizing={"border-box"}
+        <Stack>
+          <Divider />
+          <Stack direction="row" columnGap={2} pl={3} py={2}>
+            <Button
+              variant="outlined"
+              startIcon={<AddIcon />}
+              sx={{ boxShadow: "none" }}
+              size="small"
+              onClick={() => {
+                setDialogMode("add");
+                setDialogOpen(true);
+              }}
             >
-              <RevisitMonthProgress
-                key={month}
-                student={student}
-                revisitProgress={revisitProgress}
-                selectedSemester={visibleSemester}
-                selectedMonth={month}
-                labelsPosition={month % 2 === 0 ? "top" : "bottom"}
-                levels={levels}
-              />
-            </Box>
-          ))}
-        </Stack>
-      </Stack>
+              إضافة مراجعة
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<RemoveIcon />}
+              sx={{ boxShadow: "none" }}
+              size="small"
+              onClick={() => {
+                setDialogMode("remove");
+                setDialogOpen(true);
+              }}
+              color="error"
+            >
+              إزالة مراجعة{" "}
+            </Button>
+          </Stack>
 
-      <RevisitProgressDialog
-        student={{ ...student, revisitProgress }}
-        open={dialogOpen}
-        onClose={() => setDialogOpen(false)}
-        mode={dialogMode}
-        onSubmit={(updatedValue) => {
-          setRevisitProgress(updatedValue);
-        }}
-      />
+          <Divider />
+          <SemesterNavigator
+            student={student}
+            currentSemesterDetails={currentSemesterDetails}
+            selectedSemester={visibleSemester}
+            setSelectedSemester={setVisibleSemester}
+          />
+          <Divider sx={{ mt: 0.5 }} />
+        </Stack>
+        <Box>
+          <Typography
+            variant="subtitle2"
+            color={colors.teal["700"]}
+            sx={{ mt: 1.5, mb: 0.8, mx: 1.5 }}
+          >
+            * كل مستطيل في الشكل أدناه يمثل شهرًا، اضغط على المساحات الخضراء
+            للمزيد من التفاصيل{" "}
+          </Typography>
+        </Box>
+
+        <Stack mt={1}>
+          <Stack
+            direction="row"
+            my={2}
+            width={"100%"}
+            alignItems={"center"}
+            px={1.5}
+            boxSizing={"border-box"}
+          >
+            {Array.from({ length: monthsCount }, (_, i) => i + 1).map(
+              (month) => (
+                <Box
+                  width={`${100 / monthsCount}%`}
+                  key={month}
+                  px={0.5}
+                  boxSizing={"border-box"}
+                >
+                  <RevisitMonthProgress
+                    key={month}
+                    student={student}
+                    revisitProgress={revisitProgress}
+                    selectedSemester={visibleSemester}
+                    selectedMonth={month}
+                    labelsPosition={month % 2 === 0 ? "top" : "bottom"}
+                    levels={levels}
+                  />
+                </Box>
+              )
+            )}
+          </Stack>
+        </Stack>
+
+        <RevisitProgressDialog
+          student={{ ...student, revisitProgress }}
+          open={dialogOpen}
+          onClose={() => setDialogOpen(false)}
+          mode={dialogMode}
+          onSubmit={(updatedValue) => {
+            setRevisitProgress(updatedValue);
+          }}
+        />
+      </Stack>
     </Stack>
   );
 }

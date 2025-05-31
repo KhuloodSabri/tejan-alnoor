@@ -3,7 +3,6 @@ import { getLevelMemorizingDirection } from "../../utils/levels";
 import { colors, Typography } from "@mui/material";
 import _ from "lodash";
 import { getPositiveProgressPrefix } from "./utils";
-import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrowLeft";
 import { translateNumberToArabic } from "../../utils/numbers";
 
 export default function PastMemProgress({ student }) {
@@ -29,9 +28,13 @@ export default function PastMemProgress({ student }) {
 
   if (currentDirection === "desc") {
     return (
-      <Typography fontWeight={400} variant="body1" color={colors.teal["700"]}>
-        <KeyboardDoubleArrowLeftIcon sx={{ verticalAlign: "text-bottom" }} />
-        كما {prefix} الحفظ من أول المصحف حتى صفحة{" "}
+      <Typography
+        fontWeight={400}
+        variant="body1"
+        color={colors.teal["700"]}
+        pl={3.5}
+      >
+        * كما {prefix} الحفظ من أول المصحف حتى صفحة{" "}
         {translateNumberToArabic(maxOppositeProgress)}{" "}
       </Typography>
     );
@@ -67,9 +70,13 @@ export default function PastMemProgress({ student }) {
   }
 
   return (
-    <Typography fontWeight={400} variant="body1" color={colors.teal["700"]}>
-      <KeyboardDoubleArrowLeftIcon sx={{ verticalAlign: "text-bottom" }} />
-      {description}
+    <Typography
+      fontWeight={400}
+      variant="body1"
+      color={colors.teal["700"]}
+      pl={3.5}
+    >
+      * {description}
     </Typography>
   );
 }

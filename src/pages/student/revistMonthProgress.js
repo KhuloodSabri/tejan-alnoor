@@ -81,9 +81,6 @@ function StudentProgressLabels({
     return `صفــ ${translateNumberToArabic(progress.page)} ــحة`;
   };
 
-  console.log("rangesWithDetails", rangesWithDetails);
-  console.log("visibleRevisitInterval", visibleRevisitInterval);
-
   return (
     <Stack minWidth="100%" position="relative" height={85}>
       {(!rangesWithDetails?.length ||
@@ -390,7 +387,11 @@ export default function RevisitMonthProgress({
         >
           {_.isEmpty(rangesWithDetails) && (
             <Stack height={50} justifyContent="center" alignItems="center">
-              <Typography color={colors.grey["400"]}>
+              <Typography
+                color={colors.grey["400"]}
+                fontSize={{ xs: 12, sm: 15 }}
+                textAlign="center"
+              >
                 لم {getNegativeProgressPrefix(student)} أي مراجعة بعد
               </Typography>
             </Stack>
