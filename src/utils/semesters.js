@@ -1,3 +1,5 @@
+import _ from "lodash";
+import { getLevelMemorizingDirection } from "./levels";
 export function getStudentSemesterStartWeek(student, semesterDetails) {
   const joinYear = student.joinYear;
   const joinSemester = student.joinSemester;
@@ -20,7 +22,109 @@ export function getStudentSemesterStartWeek(student, semesterDetails) {
   }, 0);
 
   // This case should not be hit
-  return Math.max(monthsSinceJoin * 4, 0);
+  let startWeek = Math.max(monthsSinceJoin * 4, 0);
+
+  startWeek += (semesterDetails.month - 1) * 4; // 4 weeks in a month
+
+  if (
+    student.joinYear === semesterDetails.year &&
+    student.joinSemester === semesterDetails.semester
+  ) {
+    startWeek -= (student.joinMonth - 1) * 4;
+  }
+
+  return startWeek;
+}
+
+export function getStudentSemesterLevelID(student, semesterDetails) {
+  const sortedChanges = (student.levelChanges ?? []).sort((a, b) =>
+    compareSemesters(a.semester, b.semester)
+  );
+
+  const prevLevelChange = sortedChanges.find((levelChange) => {
+    return compareSemesters(levelChange.semester, semesterDetails) <= 0;
+  });
+
+  if (prevLevelChange) {
+    return prevLevelChange.toLevelID;
+  }
+
+  const nextLevelChange = sortedChanges.find((levelChange) => {
+    return compareSemesters(levelChange.semester, semesterDetails) > 0;
+  });
+
+  if (nextLevelChange) {
+    return nextLevelChange.fromLevelID;
+  }
+
+  return student.levelID;
+}
+
+export function getStudentSemesterLevelChangesPlanShift(
+  student,
+  semesterDetails,
+  levels
+) {
+  const sortedChanges = (student.levelChanges ?? []).sort((a, b) =>
+    compareSemesters(a.semester, b.semester)
+  );
+
+  const lastLevelChange = sortedChanges.find((levelChange) => {
+    return compareSemesters(levelChange.semester, semesterDetails) <= 0;
+  });
+
+  if (!lastLevelChange) {
+    return 0;
+  }
+
+  const levelsMap = _.keyBy(levels, (level) => level.levelID);
+
+  let newLevelPlanStartMonth = 0;
+  //levelID 0 has different memorizing direction than other levels
+  if (
+    getLevelMemorizingDirection(lastLevelChange.toLevelID) !==
+    getLevelMemorizingDirection(lastLevelChange.fromLevelID)
+  ) {
+    const prevChangeFromSameDirection = sortedChanges.find((levelChange) => {
+      // needs to be before
+      if (
+        compareSemesters(levelChange.semester, lastLevelChange.semester) >= 0
+      ) {
+        return false;
+      }
+
+      return (
+        getLevelMemorizingDirection(lastLevelChange.toLevelID) ===
+        getLevelMemorizingDirection(levelChange.fromLevelID)
+      );
+    });
+
+    if (prevChangeFromSameDirection) {
+      newLevelPlanStartMonth = levelsMap[
+        lastLevelChange.toLevelID
+      ].monthsPlanByPage.findIndex(
+        (monthProgress) =>
+          prevChangeFromSameDirection.memorizingProgress < monthProgress
+      );
+    } else {
+      newLevelPlanStartMonth = 0;
+    }
+  } else {
+    newLevelPlanStartMonth = levelsMap[
+      lastLevelChange.toLevelID
+    ].monthsPlanByPage.findIndex(
+      (monthProgress) => lastLevelChange.memorizingProgress < monthProgress
+    );
+  }
+
+  const lastLevelChangeStartWeek = getStudentSemesterStartWeek(student, {
+    year: lastLevelChange.semester.year,
+    semester: lastLevelChange.semester.semester,
+    month: lastLevelChange.semester.month,
+  });
+
+  let shift = newLevelPlanStartMonth * 4 - lastLevelChangeStartWeek;
+  return shift;
 }
 
 export function getSemesterMonthsCount(semester) {

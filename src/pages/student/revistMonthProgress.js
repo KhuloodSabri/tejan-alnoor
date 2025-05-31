@@ -8,11 +8,17 @@ import {
   Typography,
 } from "@mui/material";
 
-import React, { useMemo } from "react";
-import { getCommulativeAyahDetails } from "../../utils/surah";
+import React, { useEffect, useMemo } from "react";
+import {
+  convertAyahProgressToPage,
+  convertPageProgressToAyah,
+  getCommulativeAyahDetails,
+} from "../../utils/surah";
 import { translateNumberToArabic } from "../../utils/numbers";
 import {
   compareSemesters,
+  getStudentSemesterLevelChangesPlanShift,
+  getStudentSemesterLevelID,
   getStudentSemesterStartWeek,
 } from "../../utils/semesters";
 
@@ -61,18 +67,22 @@ function StudentProgressLabels({
   visibleRevisitInterval,
   rangesWithDetails,
   total,
+  targetLevel,
 
   hideStartLabel = false,
   hideEndLabel = false,
   labelProps,
 }) {
   const getPrgoressLabel = (progress) => {
-    if (student.progressUnit === "ayah") {
+    if (targetLevel.progressUnit === "ayah") {
       return `${progress.surah} (${translateNumberToArabic(progress.ayah)})`;
     }
 
     return `صفــ ${translateNumberToArabic(progress.page)} ــحة`;
   };
+
+  console.log("rangesWithDetails", rangesWithDetails);
+  console.log("visibleRevisitInterval", visibleRevisitInterval);
 
   return (
     <Stack minWidth="100%" position="relative" height={85}>
@@ -83,7 +93,7 @@ function StudentProgressLabels({
           {...labelProps}
           left={`2px`}
           text={getPrgoressLabel(
-            student.progressUnit === "ayah"
+            targetLevel.progressUnit === "ayah"
               ? getCommulativeAyahDetails(visibleRevisitInterval[0])
               : { page: visibleRevisitInterval[0] }
           )}
@@ -119,7 +129,7 @@ function StudentProgressLabels({
           {...labelProps}
           left={`calc(100% - 2px)`}
           text={getPrgoressLabel(
-            student.progressUnit === "ayah"
+            targetLevel.progressUnit === "ayah"
               ? getCommulativeAyahDetails(visibleRevisitInterval[1])
               : { page: visibleRevisitInterval[1] }
           )}
@@ -138,45 +148,106 @@ export default function RevisitMonthProgress({
   hideStartLabel = false,
   hideEndLabel = false,
   labelsPosition = "bottom",
+  levels,
 }) {
   const [hintIndexOpen, setHintIndexOpen] = React.useState(null);
 
-  const visibleRevisitInterval = useMemo(() => {
-    let startWeek = getStudentSemesterStartWeek(student, selectedSemester);
-    startWeek += (selectedMonth - 1) * 4; // 4 weeks in a month
+  const targetLevel = useMemo(() => {
+    const targetLevelID = getStudentSemesterLevelID(student, {
+      ...selectedSemester,
+      month: selectedMonth,
+    });
+    return levels.find((level) => level.levelID === targetLevelID);
+  }, [student, selectedSemester, selectedMonth, levels]);
 
-    if (
-      student.joinYear === selectedSemester.year &&
-      student.joinSemester === selectedSemester.semester
-    ) {
-      if (student.joinMonth > selectedMonth) {
-        return [];
+  const [targetRevisitProgress, setTargetRevisitProgress] = React.useState(
+    revisitProgress,
+    []
+  );
+
+  useEffect(() => {
+    const getTargetRevisitProgress = async () => {
+      if (
+        student.progressUnit === "ayah" &&
+        targetLevel.progressUnit === "page"
+      ) {
+        const res = await convertAyahProgressToPage(revisitProgress);
+        setTargetRevisitProgress(res);
+      } else if (
+        student.progressUnit === "page" &&
+        targetLevel.progressUnit === "ayah"
+      ) {
+        const res = await convertPageProgressToAyah(revisitProgress);
+        setTargetRevisitProgress(res);
+      } else {
+        setTargetRevisitProgress(revisitProgress);
       }
 
-      startWeek -= (student.joinMonth - 1) * 4;
+      // HERE IMPORTANT!!
+      // TODO: make sure to update frontend in correct unit
+    };
+
+    getTargetRevisitProgress();
+  }, [revisitProgress, student.progressUnit, targetLevel.progressUnit]);
+
+  const visibleRevisitInterval = useMemo(() => {
+    if (
+      student.joinYear === selectedSemester.year &&
+      student.joinSemester === selectedSemester.semester &&
+      student.joinMonth > selectedMonth
+    ) {
+      return [];
     }
+
+    let startWeek = getStudentSemesterStartWeek(student, {
+      ...selectedSemester,
+      month: selectedMonth,
+    });
+
+    const levelChangesShift = getStudentSemesterLevelChangesPlanShift(
+      student,
+      {
+        ...selectedSemester,
+        month: selectedMonth,
+      },
+      levels
+    );
+
+    startWeek += levelChangesShift;
+    // startWeek += (selectedMonth - 1) * 4; // 4 weeks in a month
+
+    // if (
+    //   student.joinYear === selectedSemester.year &&
+    //   student.joinSemester === selectedSemester.semester
+    // ) {
+    //   if (student.joinMonth > selectedMonth) {
+    //     return [];
+    //   }
+
+    //   startWeek -= (student.joinMonth - 1) * 4;
+    // }
 
     // minus 1 because the last week is inclusive
     let endWeek = startWeek + 4 - 1;
 
-    if (!student.levelRevisitWeeksPlan[startWeek]) {
+    if (!targetLevel.weeksPlan[startWeek]) {
       return undefined;
     }
 
-    while (!student.levelRevisitWeeksPlan[endWeek]) {
+    while (!targetLevel.weeksPlan[endWeek]) {
       endWeek--;
     }
 
     return [
-      student.levelRevisitWeeksPlan[startWeek][0],
-      student.levelRevisitWeeksPlan[endWeek][1],
+      targetLevel.weeksPlan[startWeek][0],
+      targetLevel.weeksPlan[endWeek][1],
     ];
-  }, [selectedMonth, selectedSemester, student]);
+  }, [levels, selectedMonth, selectedSemester, student, targetLevel]);
 
   const progressPrefix = getPositiveProgressPrefix(student);
 
   const getHint = (progressRange) => {
-    if (student.progressUnit === "ayah") {
+    if (targetLevel.progressUnit === "ayah") {
       return `${progressPrefix} مراجعة الآيات من سورة ${
         progressRange[0].surah
       } آية (${translateNumberToArabic(progressRange[0].ayah)}) إلى سورة ${
@@ -190,7 +261,7 @@ export default function RevisitMonthProgress({
   };
 
   const rangesWithDetails = visibleRevisitInterval
-    ? (revisitProgress ?? [])
+    ? (targetRevisitProgress ?? [])
         .filter((range) => {
           if (range[1] < visibleRevisitInterval[0]) {
             return false;
@@ -215,14 +286,14 @@ export default function RevisitMonthProgress({
           return [
             {
               offset: start - visibleRevisitInterval[0],
-              ...(student.progressUnit === "ayah"
+              ...(targetLevel.progressUnit === "ayah"
                 ? getCommulativeAyahDetails(start)
                 : { page: start }),
               absoluteOffset: start,
             },
             {
               offset: end - visibleRevisitInterval[0],
-              ...(student.progressUnit === "ayah"
+              ...(targetLevel.progressUnit === "ayah"
                 ? getCommulativeAyahDetails(end)
                 : { page: end }),
               absoluteOffset: end,
@@ -268,16 +339,20 @@ export default function RevisitMonthProgress({
           alignItems={"center"}
           justifyContent={"center"}
         >
-          <Typography color={colors.grey["400"]} textAlign="center">
+          <Typography
+            color={colors.grey["400"]}
+            textAlign="center"
+            fontSize={{ xs: 12, sm: 15 }}
+          >
             {showFrozenLabel
               ? student.gender === "male"
-                ? "جمد الطالب التحاقه  بهذا الفصل الدراسي"
-                : "جمدت الطالبة التحاقها بهذا الفصل الدراسي"
+                ? "جمد الطالب التحاقه  هذا الشهر"
+                : "جمدت الطالبة التحاقها هذا الشهر"
               : didNotJoinYet
               ? student.gender === "male"
                 ? "لم ينضم الطالب بعد"
                 : "لم تنضم الطالبة بعد"
-              : "لم يتم تحديث الخطة الدراسية "}
+              : "لم يتم تحديث الخطة  "}
           </Typography>
         </Stack>
         <Box minHeight={85} />
@@ -292,6 +367,7 @@ export default function RevisitMonthProgress({
           student={student}
           visibleRevisitInterval={visibleRevisitInterval}
           rangesWithDetails={rangesWithDetails}
+          targetLevel={targetLevel}
           total={total}
           hideStartLabel={hideStartLabel}
           hideEndLabel={hideEndLabel}
@@ -389,6 +465,7 @@ export default function RevisitMonthProgress({
             visibleRevisitInterval={visibleRevisitInterval}
             rangesWithDetails={rangesWithDetails}
             total={total}
+            targetLevel={targetLevel}
             hideStartLabel={hideStartLabel}
             hideEndLabel={hideEndLabel}
           />

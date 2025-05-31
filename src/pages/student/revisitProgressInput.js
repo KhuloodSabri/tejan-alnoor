@@ -1,4 +1,11 @@
-import { Box, Button, colors, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  colors,
+  Stack,
+  Typography,
+} from "@mui/material";
 import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrowLeft";
 import React from "react";
 
@@ -11,6 +18,7 @@ import RevisitProgressDialog from "./revisitProgressDialog";
 
 import SemesterNavigator from "./semesterNavigator";
 import RevisitMonthProgress from "./revistMonthProgress";
+import { useLevels } from "../../services/levels";
 
 export default function RevisitProgressInput({
   student,
@@ -30,8 +38,20 @@ export default function RevisitProgressInput({
 
   const monthsCount = getSemesterMonthsCount(visibleSemester);
 
+  const { data: levels, levelsLoading } = useLevels();
+
+  if (levelsLoading || !levels?.length) {
+    return (
+      <Box width="fit-content" mx="auto" mt={1}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  console.log("in parent levels", levels);
+
   return (
-    <Stack rowGap={1}>
+    <Stack rowGap={1} mb={2}>
       <Box>
         <Typography variant="h6" color={colors.teal["700"]}>
           <Typography
@@ -90,10 +110,10 @@ export default function RevisitProgressInput({
         <Stack
           direction="row"
           mt={2}
-          // columnGap={2}
           width={"100%"}
-          // sx={{ bgcolor: "red" }}
           alignItems={"center"}
+          px={1.5}
+          boxSizing={"border-box"}
         >
           {Array.from({ length: monthsCount }, (_, i) => i + 1).map((month) => (
             <Box
@@ -109,6 +129,7 @@ export default function RevisitProgressInput({
                 selectedSemester={visibleSemester}
                 selectedMonth={month}
                 labelsPosition={month % 2 === 0 ? "top" : "bottom"}
+                levels={levels}
               />
             </Box>
           ))}

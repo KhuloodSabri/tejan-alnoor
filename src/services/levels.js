@@ -16,19 +16,16 @@ const ADMIN_BASE_URL =
 export const useLevels = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const { getAccessTokenSilently } = useAuth0();
   useEffect(() => {
     setLoading(true);
     const fetchData = async () => {
-      const url = `${ADMIN_BASE_URL}`;
+      console.log("Fetching levels data...");
+      const url = `${BASE_URL}`;
 
       try {
-        const token = await getAccessTokenSilently();
-
         const response = await axios.get(url, {
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
         });
 
