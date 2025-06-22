@@ -24,3 +24,16 @@ export const translateNumberToEnglish = (number) => {
     )
     .join("");
 };
+
+export const arabicOrdinals = {
+  1: "أول",
+  2: "ثاني",
+  3: "ثالث",
+  4: "رابع",
+  5: "خامس",
+  6: "سادس",
+  7: "سابع",
+  8: "ثامن",
+  9: "تاسع",
+  10: "عاشر",
+};

@@ -15,7 +15,7 @@ import AddSemesterDialog from "./addSemesterDialog";
 import DeleteIcon from "@mui/icons-material/Delete";
 import _ from "lodash";
 
-export default function SemestersHistory({
+export default function SemestersStatusHistory({
   formik,
   targetSemesters,
   title,

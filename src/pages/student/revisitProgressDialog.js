@@ -12,6 +12,8 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import PageInput from "./pageInput";
 
+// TODO:: add subbar for each month and indicate level changes
+// ordering in amma level (order by juz desc then surah asc, subbar for each juz)
 export default function RevisitProgressDialog({
   student,
   mode,
@@ -70,7 +72,6 @@ export default function RevisitProgressDialog({
         (progress) => progress[0] <= toValue && progress[1] > toValue
       );
 
-      //   last range that falls completely withen the deleted range
       const part2FirstIndex = oldProgress.findLastIndex(
         (progress) => progress[0] > toValue
       );
@@ -79,6 +80,13 @@ export default function RevisitProgressDialog({
         newProgress = oldProgress.slice(0, part1LastIndex + 1);
       }
 
+      console.log(
+        part1LastIndex,
+        partialRange1Index,
+        partialRange2Index,
+        part2FirstIndex
+      );
+
       if (partialRange1Index >= 0) {
         newProgress = [
           ...newProgress,
@@ -86,10 +94,7 @@ export default function RevisitProgressDialog({
         ];
       }
 
-      if (
-        partialRange2Index >= 0 &&
-        partialRange2Index !== partialRange1Index
-      ) {
+      if (partialRange2Index >= 0) {
         newProgress = [
           ...newProgress,
           [toValue + 1, oldProgress[partialRange2Index][1]],

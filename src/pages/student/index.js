@@ -1,4 +1,5 @@
 import {
+  Alert,
   Box,
   Button,
   CircularProgress,
@@ -20,6 +21,11 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { Link as RouterLink } from "react-router-dom";
 import { useCurrentSemesterDetails } from "../../services/configs";
 import StudentTests from "./studentTests";
+import PastMemProgress from "./pastMemProgress";
+import { getLevelMemorizingDirection } from "../../utils/levels";
+import { arabicOrdinals, translateNumberToArabic } from "../../utils/numbers";
+import { getStudentSemesterStartWeek } from "../../utils/semesters";
+import { getStudentDescription } from "./utils";
 
 export default function StudenPage() {
   const { studentId } = useParams();
@@ -77,6 +83,12 @@ export default function StudenPage() {
         {student.gender === "male" ? "الطالب" : "الطالبة"} {student.studentName}
       </Typography>
       <Divider />
+      <Alert severity="info" sx={{ mb: 1 }}>
+        انحن الآن في السنة الدراسية{" "}
+        {translateNumberToArabic(currentSemesterDetails.year)}، الفصل الدراسي ال
+        {arabicOrdinals[currentSemesterDetails.semester]}، الشهر ال
+        {arabicOrdinals[currentSemesterDetails.month]}
+      </Alert>
       <Typography variant="h6" color={colors.teal["700"]}>
         <Typography
           component="span"
@@ -105,11 +117,39 @@ export default function StudenPage() {
         {student.supervisorName}
       </Typography>
 
-      <SimpleProgressInput
-        student={student}
-        progressKey="memorizingProgress"
-        description="التسميع حتى صفحة "
-      />
+      <Stack>
+        <Typography variant="h6" color={colors.teal["700"]}>
+          <KeyboardDoubleArrowLeftIcon sx={{ verticalAlign: "text-bottom" }} />
+          الشهر الحالي لل{getStudentDescription(student)} في الملتقى
+          {": "}
+          {translateNumberToArabic(
+            getStudentSemesterStartWeek(student, currentSemesterDetails) / 4 + 1
+          )}
+        </Typography>
+        <Typography color={colors.teal["700"]} pl={3.5}>
+          * هذا لا يشمل الأشهر التي تم تجميد الالتحاق فيها
+        </Typography>
+      </Stack>
+
+      <Stack>
+        <SimpleProgressInput
+          student={student}
+          progressKey="memorizingProgress"
+          description={
+            getLevelMemorizingDirection(student.levelID) === "asc"
+              ? "الحفظ حتى صفحة "
+              : " حفظ"
+          }
+          postfixDescription={
+            getLevelMemorizingDirection(student.levelID) === "asc"
+              ? ""
+              : " صفحة"
+          }
+        />
+
+        <PastMemProgress student={student} />
+      </Stack>
+
       <RevisitProgressInput
         student={student}
         currentSemesterDetails={currentSemesterDetails}
