@@ -69,7 +69,7 @@ export function getStudentSemesterLevelChangesPlanShift(
     compareSemesters(a.semester, b.semester)
   );
 
-  const lastLevelChange = sortedChanges.find((levelChange) => {
+  const lastLevelChange = sortedChanges.findLast((levelChange) => {
     return compareSemesters(levelChange.semester, semesterDetails) <= 0;
   });
 
