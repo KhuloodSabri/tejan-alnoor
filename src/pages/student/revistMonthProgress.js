@@ -211,18 +211,6 @@ export default function RevisitMonthProgress({
     );
 
     startWeek += levelChangesShift;
-    // startWeek += (selectedMonth - 1) * 4; // 4 weeks in a month
-
-    // if (
-    //   student.joinYear === selectedSemester.year &&
-    //   student.joinSemester === selectedSemester.semester
-    // ) {
-    //   if (student.joinMonth > selectedMonth) {
-    //     return [];
-    //   }
-
-    //   startWeek -= (student.joinMonth - 1) * 4;
-    // }
 
     // minus 1 because the last week is inclusive
     let endWeek = startWeek + 4 - 1;

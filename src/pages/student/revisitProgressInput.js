@@ -18,11 +18,12 @@ import RevisitProgressDialog from "./revisitProgressDialog";
 
 import SemesterNavigator from "./semesterNavigator";
 import RevisitMonthProgress from "./revistMonthProgress";
-import { useLevels } from "../../services/levels";
 
 export default function RevisitProgressInput({
   student,
   currentSemesterDetails,
+  levels,
+  levelsLoading,
 }) {
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [dialogMode, setDialogMode] = React.useState("add");
@@ -35,8 +36,6 @@ export default function RevisitProgressInput({
   );
 
   const monthsCount = getSemesterMonthsCount(visibleSemester);
-
-  const { data: levels, levelsLoading } = useLevels();
 
   if (levelsLoading || !levels?.length) {
     return (

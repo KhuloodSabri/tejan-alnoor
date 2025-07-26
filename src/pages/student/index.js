@@ -10,7 +10,7 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import React from "react";
+import React, { useMemo } from "react";
 import { useParams } from "react-router-dom";
 
 import { useStudentSummary } from "../../services/students";
@@ -24,8 +24,11 @@ import StudentTests from "./studentTests";
 import PastMemProgress from "./pastMemProgress";
 import { getLevelMemorizingDirection } from "../../utils/levels";
 import { arabicOrdinals, translateNumberToArabic } from "../../utils/numbers";
-import { getStudentSemesterStartWeek } from "../../utils/semesters";
-import { getStudentDescription } from "./utils";
+import {
+  getStudentSemesterLevelChangesPlanShift,
+  getStudentSemesterStartWeek,
+} from "../../utils/semesters";
+import { useLevels } from "../../services/levels";
 
 export default function StudenPage() {
   const { studentId } = useParams();
@@ -35,9 +38,40 @@ export default function StudenPage() {
     data: currentSemesterDetails,
     loading: currentSemesterDetailsLoading,
   } = useCurrentSemesterDetails();
+  const { data: levels, levelsLoading } = useLevels();
 
   const theme = useTheme();
   const smScreen = useMediaQuery(theme.breakpoints.up("sm"));
+
+  const currentPlanMonth = useMemo(() => {
+    if (loading || currentSemesterDetailsLoading) {
+      return null;
+    }
+
+    if (!currentSemesterDetails || !student) {
+      return null;
+    }
+
+    let currentMonthWeek = getStudentSemesterStartWeek(
+      student,
+      currentSemesterDetails
+    );
+
+    const levelChangesShift = getStudentSemesterLevelChangesPlanShift(
+      student,
+      currentSemesterDetails,
+      levels
+    );
+
+    // Adding 1 for to make it 1 based
+    return (currentMonthWeek + levelChangesShift) / 4 + 1;
+  }, [
+    currentSemesterDetails,
+    currentSemesterDetailsLoading,
+    levels,
+    loading,
+    student,
+  ]);
 
   if (loading || currentSemesterDetailsLoading) {
     return (
@@ -120,14 +154,8 @@ export default function StudenPage() {
       <Stack>
         <Typography variant="h6" color={colors.teal["700"]}>
           <KeyboardDoubleArrowLeftIcon sx={{ verticalAlign: "text-bottom" }} />
-          الشهر الحالي لل{getStudentDescription(student)} في الملتقى
-          {": "}
-          {translateNumberToArabic(
-            getStudentSemesterStartWeek(student, currentSemesterDetails) / 4 + 1
-          )}
-        </Typography>
-        <Typography color={colors.teal["700"]} pl={3.5}>
-          * هذا لا يشمل الأشهر التي تم تجميد الالتحاق فيها
+          الخطة الحالية: {student.levelName} شهر
+          {translateNumberToArabic(currentPlanMonth)}
         </Typography>
       </Stack>
 
@@ -153,6 +181,8 @@ export default function StudenPage() {
       <RevisitProgressInput
         student={student}
         currentSemesterDetails={currentSemesterDetails}
+        levels={levels}
+        levelsLoading={levelsLoading}
       />
 
       <StudentTests
