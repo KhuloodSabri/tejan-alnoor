@@ -43,13 +43,19 @@ export default function StudenPage() {
   const theme = useTheme();
   const smScreen = useMediaQuery(theme.breakpoints.up("sm"));
 
-  const currentPlanMonth = useMemo(() => {
+  const { currentPlanMonth, currentMonth } = useMemo(() => {
     if (loading || currentSemesterDetailsLoading) {
-      return null;
+      return {
+        currentPlanMonth: null,
+        currentMonth: null,
+      };
     }
 
     if (!currentSemesterDetails || !student) {
-      return null;
+      return {
+        currentPlanMonth: null,
+        currentMonth: null,
+      };
     }
 
     let currentMonthWeek = getStudentSemesterStartWeek(
@@ -64,7 +70,10 @@ export default function StudenPage() {
     );
 
     // Adding 1 for to make it 1 based
-    return (currentMonthWeek + levelChangesShift) / 4 + 1;
+    return {
+      currentPlanMonth: (currentMonthWeek + levelChangesShift) / 4 + 1,
+      currentMonth: currentMonthWeek / 4 + 1,
+    };
   }, [
     currentSemesterDetails,
     currentSemesterDetailsLoading,
@@ -156,6 +165,18 @@ export default function StudenPage() {
           <KeyboardDoubleArrowLeftIcon sx={{ verticalAlign: "text-bottom" }} />
           الخطة الحالية: {student.levelName} شهر
           {translateNumberToArabic(currentPlanMonth)}
+        </Typography>
+      </Stack>
+
+      <Stack>
+        <Typography variant="h6" color={colors.teal["700"]}>
+          <KeyboardDoubleArrowLeftIcon sx={{ verticalAlign: "text-bottom" }} />
+          الشهر الحالي في الملتقى
+          {": "}
+          {translateNumberToArabic(currentMonth)}
+        </Typography>
+        <Typography color={colors.teal["700"]} pl={3.5}>
+          * هذا لا يشمل الأشهر التي تم تجميد الالتحاق فيها
         </Typography>
       </Stack>
 
