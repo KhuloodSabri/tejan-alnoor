@@ -31,7 +31,7 @@ import AuthButton from "./components/authButton";
 import ImportStudents from "./pages/admin/students/importStudents";
 import EditStudentsPage from "./pages/admin/students/editStudents";
 import EditStudentPage from "./pages/admin/students/editStudents/editStudent";
-import StudentAlertsPage from "./pages/admin/students/alertStudents/alert-students";
+import StudentAlertsPage from "./pages/admin/students/alertStudents/alertStudents";
 
 // Create rtl cache
 const cacheRtl = createCache({

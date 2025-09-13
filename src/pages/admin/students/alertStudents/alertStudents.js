@@ -14,17 +14,24 @@ import {
   MenuItem,
   Paper,
   Stack,
+  Tooltip,
+  ToggleButton,
+  ToggleButtonGroup,
+  CircularProgress,
 } from "@mui/material";
 import axios from "axios";
 import { useAuth0 } from "@auth0/auth0-react";
+import CheckIcon from "@mui/icons-material/Check";
+import CloseIcon from "@mui/icons-material/Close";
+import _ from "lodash";
 const BASE_URL =
   window.location.hostname === "localhost"
     ? "http://localhost:3033/admin"
     : "https://5nvqhwbweydlc2yfyoqca5dyie0sonpg.lambda-url.eu-north-1.on.aws/admin";
 
-const buildStudentsUrl = async (params) => {
+const buildStudentsUrl = (params) => {
   //not ready yet
-  const url = new URL(`${BASE_URL}/alerts/students`, window.location.origin);
+  const url = new URL(`${BASE_URL}/students/alerts`, window.location.origin);
   url.searchParams.set("year", params.year);
   url.searchParams.set("semester", params.semester);
   url.searchParams.set("month", params.month);
@@ -44,6 +51,7 @@ async function fetchStudentsAPI(
     checkRoundNumber,
     gender,
   });
+
   const res = await axios.get(url, {
     headers: {
       "Content-Type": "application/json",
@@ -63,6 +71,16 @@ async function submitAlertsAPI(payloadArray, token) {
   return res.data;
 }
 
+async function submitUpdateAlertAPI(alertId, payload, token) {
+  const res = await axios.put(`${BASE_URL}/alerts/${alertId}`, payload, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res.data;
+}
+
 const currentYear = new Date().getFullYear();
 const years = Array.from({ length: 7 }, (_, i) => String(currentYear - i));
 
@@ -72,7 +90,7 @@ const semesters = [
   { value: "3", label: "الصيفي" },
 ];
 
-const months = Array.from({ length: 12 }, (_, i) => ({
+const months = Array.from({ length: 3 }, (_, i) => ({
   value: String(i + 1),
   label: String(i + 1),
 }));
@@ -99,32 +117,12 @@ const StudentAlertsPage = () => {
     gender: "",
   });
 
-  const [rows, setRows] = useState([
-    {
-      id: "63a87caa-c340-4eb1-997e-0aa60db683c0",
-      studentID: "63a87caa-c340-4eb1-997e-0aa60db683c0",
-      studentName: "علي أحمد",
-      supervisorName: "د. سمير خالد",
-      phoneNumber: "+970599123456",
-      status: "تحذير",
-      alertSource: "حفظ",
-      gender: "male",
-    },
-    {
-      id: "9105d-1479-4588-a3c9-10f8494397e2",
-      studentID: "9105d-1479-4588-a3c9-10f8494397e2",
-      studentName: "فاطمة محمود",
-      supervisorName: "م. ليلى سعيد",
-      phoneNumber: "+970599654321",
-      status: "فصل",
-      alertSource: "مراجعة",
-      gender: "female",
-    },
-  ]);
+  const [rows, setRows] = useState([]);
 
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [checkedRows, setCheckedRows] = useState([]);
+  const [recoverSubmittingRows, setRecoverSubmittingRows] = useState([]);
 
   const isFiltersValid = useMemo(() => {
     return (
@@ -142,15 +140,18 @@ const StudentAlertsPage = () => {
       setLoading(true);
       const token = await getAccessTokenSilently();
       const data = await fetchStudentsAPI(filters, token);
+      // Same student can have two alerts (from memorizing and visit)
       const normalized = data.map((s, idx) => ({
-        id: s.id ?? s.studentID ?? `row-${idx}`,
+        id: `row-${idx}`,
         studentID: s.studentID ?? s.id ?? `S-${idx}`,
         studentName: s.studentName ?? s.name ?? "—",
         supervisorName: s.supervisorName ?? s.supervisor ?? "—",
         phoneNumber: s.phoneNumber ?? s.phone ?? "—",
-        status: s.status ?? s.alertType ?? "—",
+        alertType: s.alertType ?? s.alertType ?? "—",
         alertSource: s.alertSource ?? "—",
         gender: s.gender ?? "—",
+        alertId: s.alertId || null,
+        alertRecoveredAt: s.alertRecoveredAt || null,
       }));
       setRows(normalized);
       setCheckedRows([]);
@@ -170,20 +171,20 @@ const StudentAlertsPage = () => {
 
   const submissionPayload = useMemo(() => {
     const nowUnix = Math.floor(Date.now() / 1000);
-    const semesterObj = {
-      year: Number(filters.year || currentYear),
-      semester: Number(filters.semester || 1),
-      month: Number(filters.month || 1),
-    };
+
     return rows
       .filter((r) => checkedRows.includes(r.id))
       .map((r) => ({
         studentID: r.studentID,
         createdAt: nowUnix,
-        alertType: r.status ?? "—",
+        alertType: r.alertType ?? "—",
         alertSource: r.alertSource ?? "—",
-        semester: semesterObj,
+        year: Number(filters.year || currentYear),
+        semester: Number(filters.semester || 1),
+        month: Number(filters.month || 1),
         checkRoundNumber: Number(filters.checkRoundNumber || 1),
+        alertId: r.alertId || null,
+        alertRecoveredAt: r.alertRecoveredAt || null,
       }));
   }, [rows, checkedRows, filters]);
 
@@ -201,6 +202,41 @@ const StudentAlertsPage = () => {
       alert(err.message);
     } finally {
       setSubmitting(false);
+      handleLoad();
+    }
+  };
+
+  const handleToggleRecovered = async (id, value) => {
+    const row = rows.find((r) => r.id === id);
+
+    if (!row?.alertId) {
+      return;
+    }
+
+    try {
+      setRecoverSubmittingRows((prev) => [...prev, id]);
+      const token = await getAccessTokenSilently();
+      await submitUpdateAlertAPI(
+        row.alertId,
+        {
+          recoveredAt: value ? Math.floor(Date.now() / 1000) : null,
+        },
+        token
+      );
+      setRows((prev) =>
+        prev.map((r) =>
+          r.id === id
+            ? { ...r, alertRecoveredAt: value ? Date.now() : null }
+            : r
+        )
+      );
+    } catch (err) {
+      console.error(err);
+      window.alert(
+        `حدث خطأ أثناء تحديث حالة المعالجة للطالبـ/ـة ${row.studentName}`
+      );
+    } finally {
+      setRecoverSubmittingRows((prev) => prev.filter((x) => x !== id));
     }
   };
 
@@ -208,20 +244,25 @@ const StudentAlertsPage = () => {
     {
       field: "studentName",
       headerName: "اسم الطالب",
+      width: 150,
       renderCell: (params) => (
-        <Typography
-          onClick={() =>
-            navigate(`/tejan-alnoor/admin/editStudents/${params.row.studentID}`)
-          }
-          sx={{ color: "primary.main", cursor: "pointer" }}
-        >
-          {params.value}
-        </Typography>
+        <Box height="100%" display="flex" alignItems="center">
+          <Typography
+            onClick={() =>
+              navigate(
+                `/tejan-alnoor/admin/editStudents/${params.row.studentID}`
+              )
+            }
+            sx={{ color: "primary.main", cursor: "pointer" }}
+          >
+            {params.value}
+          </Typography>
+        </Box>
       ),
     },
     { field: "supervisorName", headerName: "اسم المشرف" },
     { field: "phoneNumber", headerName: "رقم الهاتف", width: 160 },
-    { field: "status", headerName: "الحالة" },
+    { field: "alertType", headerName: "الحالة" },
     { field: "alertSource", headerName: "المصدر" },
     {
       field: "gender",
@@ -232,16 +273,91 @@ const StudentAlertsPage = () => {
     },
     {
       field: "select",
-      headerName: "اختيار",
+      headerName: "اختيار للإرسال",
       width: 100,
       sortable: false,
       filterable: false,
-      renderCell: (params) => (
-        <Checkbox
-          checked={checkedRows.includes(params.row.id)}
-          onChange={() => handleCheck(params.row.id)}
-        />
+      renderCell: (params) => {
+        if (params.row.alertId) {
+          return (
+            <Box height="100%" display="flex" alignItems="center">
+              <Typography color="success.main">أُرسِل سابقا</Typography>
+            </Box>
+          );
+        }
+        return (
+          <Checkbox
+            checked={checkedRows.includes(params.row.id)}
+            onChange={() => handleCheck(params.row.id)}
+          />
+        );
+      },
+    },
+    {
+      field: "recoveredAt",
+      headerName: "معالجة الطالب",
+
+      renderHeader: () => (
+        <Tooltip
+          title="هل عالج الطالب هذا التنبيه؟ (مثلا إذا كان الطالب مقصرا في المراجعة، هل نجح في الامتحان بعلامة فوق 95، أو هل اتدارك ما عليه)"
+          arrow
+        >
+          <span>معالجة الطالب</span>
+        </Tooltip>
       ),
+      renderCell: (params) => {
+        if (!params.row.alertId) {
+          return (
+            <Box height="100%" width="100%" display="flex" alignItems="center">
+              <Typography sx={{ mx: "auto" }} color="text.secondary">
+                لم يرسل بعد
+              </Typography>
+            </Box>
+          );
+        }
+        const isLoading = recoverSubmittingRows.includes(params.row.id);
+
+        if (isLoading) {
+          return (
+            <Box height="100%" width="100%" display="flex" alignItems="center">
+              <CircularProgress size={20} sx={{ mx: "auto" }} />
+            </Box>
+          );
+        }
+
+        return (
+          <Box height="100%" width="100%" display="flex" alignItems="center">
+            <ToggleButtonGroup
+              value={Boolean(params.row.alertRecoveredAt)}
+              exclusive
+              onChange={(_event, newValue) => {
+                if (_.isNil(newValue)) return;
+                handleToggleRecovered(params.row.id, newValue);
+              }}
+              sx={{ mx: "auto" }}
+            >
+              <ToggleButton
+                value={true}
+                disabled={!params.row.alertId}
+                color="success"
+                size="small"
+                sx={{ minWidth: 28, height: 28, p: 0 }}
+              >
+                <CheckIcon fontSize="small" />
+              </ToggleButton>
+              <ToggleButton
+                value={false}
+                disabled={!params.row.alertId}
+                color="error"
+                size="small"
+                sx={{ minWidth: 28, height: 28, p: 0 }}
+              >
+                <CloseIcon fontSize="small" />
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+        );
+      },
     },
   ];
 
