@@ -31,6 +31,7 @@ import AuthButton from "./components/authButton";
 import ImportStudents from "./pages/admin/students/importStudents";
 import EditStudentsPage from "./pages/admin/students/editStudents";
 import EditStudentPage from "./pages/admin/students/editStudents/editStudent";
+import StudentAlertsPage from "./pages/admin/students/alertStudents/alert-students";
 
 // Create rtl cache
 const cacheRtl = createCache({
@@ -166,6 +167,10 @@ function App() {
                       <Route
                         path="editStudents/:studentId"
                         element={<EditStudentPage />}
+                      />
+                      <Route
+                        path="alertStudents"
+                        element={<StudentAlertsPage />}
                       />
                     </Route>
                   </Routes>

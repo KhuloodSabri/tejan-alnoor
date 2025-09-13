@@ -25,7 +25,7 @@ import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
 import SyncIcon from "@mui/icons-material/Sync";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import PersonIcon from "@mui/icons-material/Person";
-
+import NewReleasesIcon from "@mui/icons-material/NewReleases";
 const AdminListItem = ({ description, Icon, path }) => {
   return (
     <ListItem>
@@ -195,6 +195,11 @@ export default function AdminPage() {
                 description="تعديل بيانات الطلاب"
                 Icon={EditIcon}
                 path="editStudents"
+              />
+              <AdminListItem
+                description="التنبيهات"
+                Icon={NewReleasesIcon}
+                path="alertStudents"
               />
             </List>
           </Box>
