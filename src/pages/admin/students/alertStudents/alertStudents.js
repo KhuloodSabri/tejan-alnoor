@@ -27,10 +27,8 @@ import _ from "lodash";
 const BASE_URL =
   window.location.hostname === "localhost"
     ? "http://localhost:3033/admin"
-    : "https://5nvqhwbweydlc2yfyoqca5dyie0sonpg.lambda-url.eu-north-1.on.aws/admin";
-
+    : "https://dtoo4lhm5ojwgql5xfxpmo6nru0alhkp.lambda-url.eu-north-1.on.aws";
 const buildStudentsUrl = (params) => {
-  //not ready yet
   const url = new URL(`${BASE_URL}/students/alerts`, window.location.origin);
   url.searchParams.set("year", params.year);
   url.searchParams.set("semester", params.semester);
@@ -147,7 +145,7 @@ const StudentAlertsPage = () => {
         studentName: s.studentName ?? s.name ?? "—",
         supervisorName: s.supervisorName ?? s.supervisor ?? "—",
         phoneNumber: s.phoneNumber ?? s.phone ?? "—",
-        alertType: s.alertType ?? s.alertType ?? "—",
+        alertType: s.alertType ?? "—",
         alertSource: s.alertSource ?? "—",
         gender: s.gender ?? "—",
         alertId: s.alertId || null,
