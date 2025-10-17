@@ -40,6 +40,74 @@ const buildStudentsUrl = (params) => {
   return url.toString();
 };
 
+function buildAlertMessage(row) {
+  const isFemale = row.gender === "أنثى";
+  const alertType = row.alertType;
+  const absence = row.absence || 0;
+  const studentName = row.studentName || "";
+
+  // Gender-specific text variations
+  const you = isFemale ? "كِ" : "كَ";
+  const student = isFemale ? "الطالبة" : "الطالب";
+  const imperative = {
+    assist: isFemale ? "استعيني" : "استعن",
+    dontWeaken: isFemale ? "تعجزي" : "تعجز",
+    utilize: isFemale ? "استغلي" : "استغل",
+  };
+
+  // Warning alert with less than 2 absences
+  if (alertType === "تحذير" && absence < 2) {
+    return `السلام عليكم ورحمة الله
+
+${student}: ${studentName}
+
+بدايةً نرجو أن تكون بخير ..
+
+هذه رسالة تحذير ل${you} بسبب *تأخر${you} عن خطط${you} منذ بداية الشهر* 
+
+لذلك نرجو من${you} الهمّةَ والسّعي واستدراك ما فات${you} ..
+
+
+${imperative.assist} باللهِ ولا ${imperative.dontWeaken} و${imperative.utilize} وجود${you} معنا في الملتقى ..
+
+سُددت خطا${you}  ..`;
+  }
+
+  // Warning alert with 2 or more absences
+  if (alertType === "تحذير" && absence >= 2) {
+    return `السلام عليكم ورحمة الله
+
+${student}: ${studentName}
+
+بدايةً نرجو أن تكون بخير ..
+
+هذه رسالة تحذير ل${you} بسبب *الغياب المتكرر* منذ بداية الفصل الحالي.
+
+لذلك نرجو من${you} الهمّةَ والسّعي واستدراك ما فات${you} ..
+
+ونعلم${you} أنه في *حال لم يتم التسميع للمشرف خلال الأيام القادمة فسيتم إرسال رسالة فصل* من الملتقى ولن تكون ل${you} الأولوية للتسجيل في الفصل القادم..
+
+${imperative.assist} باللهِ ولا ${imperative.dontWeaken} و${imperative.utilize} وجود${you} معنا في الملتقى ..
+
+سُددت خطا${you}  ..`;
+  }
+
+  // Dismissal alert
+  if (alertType === "فصل") {
+    return `السلام عليكم ورحمة الله..
+
+${student}: ${studentName}
+
+بدايةً نرجو أن تكون بخير ..
+
+هذه رسالة *فصل* ل${you} من إدارة الملتقى بسبب وصول${you} *للغياب الخامس* فما فوق منذ بداية الفصل الحالي.
+
+نعتذر من${you} ..
+وفق${you} الله ..`;
+  }
+
+  return "لا توجد رسالة متاحة لهذا النوع من التنبيه.";
+}
 async function fetchStudentsAPI(
   { year, semester, month, checkRoundNumber, gender },
   token
@@ -147,7 +215,7 @@ const StudentAlertsPage = () => {
         studentName: s.studentName ?? s.name ?? "—",
         supervisorName: s.supervisorName ?? s.supervisor ?? "—",
         phoneNumber: s.phoneNumber ?? s.phone ?? "—",
-        alertType: s.alertType ?? s.alertType ?? "—",
+        alertType: s.status ?? s.status ?? "—",
         alertSource: s.alertSource ?? "—",
         gender: s.gender ?? "—",
         alertId: s.alertId || null,
@@ -204,6 +272,35 @@ const StudentAlertsPage = () => {
       setSubmitting(false);
       handleLoad();
     }
+  };
+
+  const handleCopyMessages = async () => {
+    const selectedRows = rows.filter((r) => checkedRows.includes(r.id));
+
+    if (selectedRows.length === 0) {
+      window.alert("يرجى اختيار طالب واحد على الأقل لنسخ الرسائل.");
+      return;
+    }
+
+    const payload = selectedRows.map((row) => ({
+      phoneNumber: row.phoneNumber ?? "—",
+      message: buildAlertMessage(row),
+    }));
+
+    const serialized = JSON.stringify(payload, null, 2);
+
+    if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(serialized);
+        window.alert("تم نسخ الرسائل إلى الحافظة ✅");
+        return;
+      } catch (err) {
+        console.error("Clipboard copy failed", err);
+      }
+    }
+
+    console.log("رسائل التنبيه المحددة:", payload);
+    window.alert("تعذر نسخ الرسائل آلياً، تم عرضها في وحدة التحكم.");
   };
 
   const handleToggleRecovered = async (id, value) => {
@@ -469,6 +566,13 @@ const StudentAlertsPage = () => {
                 disabled={!isFiltersValid || loading}
               >
                 بحث
+              </Button>
+              <Button
+                variant="outlined"
+                disabled={checkedRows.length === 0}
+                onClick={handleCopyMessages}
+              >
+                نسخ رسائل الطلاب المحددين
               </Button>
               {!isFiltersValid && (
                 <Typography variant="body2" sx={{ alignSelf: "center" }}>
